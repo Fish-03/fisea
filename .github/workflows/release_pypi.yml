@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
     
       - name: nvcc
-        run: pipx run nvcc
+        run: run nvcc
         
       - name: Build SDist and wheel
         run: pipx run build
