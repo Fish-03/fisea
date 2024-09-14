@@ -18,4 +18,4 @@ jobs:
           powershell 
           
         run: |
-          cd actions/simplest.ps1
+          cd .././.github/workflows/simplest.ps1
