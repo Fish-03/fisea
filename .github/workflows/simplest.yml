@@ -18,6 +18,4 @@ jobs:
           powershell 
           
         run: |
-          cd Actions/NVCC/
-          
-          .\simplest.ps1
+          actions/simplest.ps1
