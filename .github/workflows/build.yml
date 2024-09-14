@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Fetch CUDA toolkit
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
@@ -33,6 +33,8 @@ jobs:
           method: network
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
+      - run: echo "Cuda install location: ${{ steps.cuda-toolkit.outputs.CUDA_PATH }}"
+      
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
