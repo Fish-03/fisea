@@ -18,4 +18,4 @@ jobs:
           powershell 
           
         run: |
-          nvcc -v
+          .\simplest.ps1
