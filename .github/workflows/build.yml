@@ -34,7 +34,12 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: fix cuda runtime
-        run: ln -s /usr/local/cuda-12.4 /usr/local/cuda
+        run: sudo ln -s /usr/local/cuda-12.4 /usr/local/cuda
+
+      - run: echo $CPATH
+      - run: echo $LD_LIBRARY_PATH
+      - run: echo $PATH
+      - run: echo which nvcc
       
       - uses: actions/setup-python@v4
         with:
