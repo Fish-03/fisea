@@ -16,14 +16,7 @@ jobs:
         with:
           fetch-depth: 0
     
-      - name: clexe 
-        shell: |
-          powershell 
-          
-        run: |
-          cd Actions/NVCC/
-          
-          .\simplest.ps1
+      
       - name: Build SDist and wheel
         run: pipx run build
 
