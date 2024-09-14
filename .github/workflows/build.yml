@@ -32,7 +32,10 @@ jobs:
           cuda: '12.4.1'
           method: network
         if: runner.os == 'Linux' || runner.os == 'Windows'
-        
+
+      - name: fix cuda runtime
+        run: ln -s /usr/local/cuda-12.4 /usr/local/cuda
+      
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
