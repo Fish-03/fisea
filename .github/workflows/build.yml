@@ -30,7 +30,7 @@ jobs:
         id: cuda-toolkit
         with:
           cuda: '12.4.1'
-          # method: network
+          method: network
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - uses: actions/setup-python@v4
