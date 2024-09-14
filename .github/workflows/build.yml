@@ -14,16 +14,6 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs:
-  CI:
-      strategy:
-        matrix:
-          os: [ubuntu-22.04, ubuntu-20.04]
-      runs-on: ${{ matrix.os }}
-      steps:
-      - uses: Jimver/cuda-toolkit@master
-        id: cuda-toolkit
-        with:
-          log-file-suffix: '${{matrix.os}}.txt'
   import:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -33,7 +23,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
+      - uses: Jimver/cuda-toolkit@v0.2.16
+        id: cuda-toolkit
+        with:
+          cuda: '12.5.0'
       - uses: actions/checkout@v3
+
 
       - uses: actions/setup-python@v4
         with:
