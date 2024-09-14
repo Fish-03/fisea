@@ -1,0 +1,27 @@
+function NVCC_SETUP
+{ 
+      echo "NVCC_SETUP ..."
+
+      ## 1.0 
+      $url="https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/windows-x86_64/cuda_nvcc-windows-x86_64-11.5.50-archive.zip"
+      $output="nvcc.zip"
+      
+      Invoke-WebRequest -Uri $url -OutFile $output
+      Expand-Archive $output -DestinationPath .   
+      
+      $NVCC="cuda_nvcc-windows-x86_64-11.5.50-archive"
+
+      ## 2.0 
+      Set-Location -Path $NVCC 
+      Set-Location bin 
+      Get-ChildItem 
+      Get-ChildItem nvcc.exe 
+ 
+      $env:NVCC_PATH="$ROOT\$NVCC\bin" 
+      $env:NVCC="$env:NVCC_PATH\nvcc.exe"  
+      
+      $env:NVCC_PATH=("$env:NVCC_PATH").replace("\","\\")
+      $env:NVCC=("$env:NVCC").replace("\","\\")
+ 
+      Set-Location -Path $ROOT
+}
