@@ -18,4 +18,4 @@ jobs:
           powershell 
           
         run: |
-          cd .././.github/workflows/simplest.ps1
+          nvcc -v
