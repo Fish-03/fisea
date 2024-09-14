@@ -13,8 +13,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: install cuda
-        run: pipx run buildcuda
+    
+      - name: nvcc
+        run: pipx run nvcc
+        
       - name: Build SDist and wheel
         run: pipx run build
 
