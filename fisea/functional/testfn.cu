@@ -1,6 +1,8 @@
-#include "testfn.cuh"
 #include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 #include <iostream>
+
+#include "testfn.cuh"
 
 __global__ void helloFromGPU() {
     printf("Hello from GPU!\n");

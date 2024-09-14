@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 #include "testfn.h"
 #include "testfn.cuh"
 
