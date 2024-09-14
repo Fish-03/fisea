@@ -16,7 +16,15 @@ find_package(pybind11 CONFIG REQUIRED)
 
 message(STATUS "FOUND project root dir is ${CMAKE_SOURCE_DIR}")
 
-enable_language(CUDA)
+check_language(CUDA)
+if(CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+
+    # to tell your code it was found via #ifdef USE_CUDA:
+    add_definitions(-DUSE_CUDA)    
+
+    include_directories("${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
+endif()
 
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
