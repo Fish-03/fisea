@@ -19,7 +19,7 @@ jobs:
       - name: Fetch CUDA toolkit
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
-          cuda: "12.6.1"
+          cuda: "12.5.0"
           linux-local-args: '["--toolkit"]'
 
       - name: Build SDist and wheel
