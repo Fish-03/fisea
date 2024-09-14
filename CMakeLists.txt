@@ -21,12 +21,12 @@ enable_language(CUDA)
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
   file(GLOB SOURCES ${MODULE_PATH}/*.cpp ${MODULE_PATH}/*.cu)
-  list(REMOVE_ITEM SOURCES "${CMAKE_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp")
+  list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp")
   
   if(SOURCES)
     add_library(${MODULE_NAME}_LIB ${SOURCES})
     set_target_properties(${MODULE_NAME}_LIB PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    python_add_library(${MODULE_NAME} MODULE "${CMAKE_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp" WITH_SOABI)
+    python_add_library(${MODULE_NAME} MODULE "${PROJECT_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp" WITH_SOABI)
     set_target_properties(${MODULE_NAME} PROPERTIES 
                           LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_PATH} 
                           OUTPUT_NAME "_cpp_extension"
