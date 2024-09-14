@@ -23,13 +23,13 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
-      
       - name: Fetch CUDA toolkit
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
         with:
           cuda: "12.5.0"
+
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-python@v4
         with:
