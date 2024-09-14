@@ -1,5 +1,7 @@
 #include <pybind11/pybind11.h>
+#include <cuda_runtime.h>
 #include "testfn.h"
+#include "testfn.cuh"
 
 namespace py = pybind11;
 
@@ -44,4 +46,7 @@ PYBIND11_MODULE(_cpp_extension, m) {
         Some other explanation about the divide function.
     )pbdoc");
 
+    m.def("cuda_test", &call_hello_from_gpu, R"pbdoc(
+        Hello from CUDA!
+    )pbdoc");
 }

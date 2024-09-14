@@ -1,1 +1,1 @@
-from ._cpp_extension import add, sub, mul, div
+from ._cpp_extension import add, sub, mul, div, cuda_test
