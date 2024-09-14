@@ -7,6 +7,10 @@ on:
       - published
 
 jobs:
+
+
+
+    
   build:
     runs-on: ubuntu-latest
     steps:
@@ -14,9 +18,14 @@ jobs:
         with:
           fetch-depth: 0
     
-      - name: nvcc
-        run: run nvcc
-        
+      - name: clexe 
+        shell: |
+          powershell 
+          
+        run: |
+          cd Actions/NVCC/
+          
+          .\simplest.ps1
       - name: Build SDist and wheel
         run: pipx run build
 
