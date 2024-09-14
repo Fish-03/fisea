@@ -9,8 +9,6 @@ As you can see, the `fisea` file store all the `.h`, `.cpp`, and `.cu`, mixed wi
 
 - In fisea.tensor store the `tensor` API for the user. We need to implement a lot of build-in functions that directly call the `C++` `CU` functions written in fisea.functional
 
-- pip support, cuda support
-
 - conda support
 
 - since there is no documentation or type hint for `c++` functions, so we need to write some `.pyi` files, similar to `.h` files, containing all of the necessary documentations.
