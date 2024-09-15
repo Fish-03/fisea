@@ -34,13 +34,9 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: fix cuda runtime
-        run: sudo ln -s /usr/local/cuda-12.4 /usr/local/cuda
-
-      - run: echo $CPATH
-      - run: echo $LD_LIBRARY_PATH
-      - run: echo $PATH
-      - run: echo which nvcc
-      
+        run: sudo ln -s /usr/local/cuda-12.4 /usr/local/cuda && echo "CPATH:$CPATH \n LD_LIBRARY_PATH:$LD_LIBRARY_PATH \n CUDA_PATH:$CUDA_PATH \n PATH:$PATH" && nvcc -V
+        if: runner.os == 'Linux'
+        
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
