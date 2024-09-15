@@ -44,7 +44,7 @@ filterwarnings = [
 testpaths = ["tests"]
 
 [tool.cibuildwheel]
-build-frontend = "build[uv]"
+build-frontend = "build"
 
 [tool.cibuildwheel.pyodide]
 environment.CFLAGS = "-fexceptions"
