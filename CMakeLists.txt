@@ -13,8 +13,6 @@ project(
 # scikit-build-core's built-in backport)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
-find_package(CUDA REQUIRED)
-message(STATUS "FOUND project root dir is ${CMAKE_SOURCE_DIR}")
 
 enable_language(CUDA)
 
