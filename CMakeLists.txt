@@ -17,8 +17,6 @@ find_package(pybind11 CONFIG REQUIRED)
 # Try to find CUDA. If found, it will be used; otherwise, continue without CUDA.
 find_package(CUDAToolkit)
 
-set(CUDAToolkit_FOUND 0)
-
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
   file(GLOB SOURCES ${MODULE_PATH}/*.cpp)
