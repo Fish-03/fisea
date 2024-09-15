@@ -27,14 +27,14 @@ export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
 nvcc -V
 
-pip install -r requirements.txt
+# pip install -r requirements.txt
 
-mkdir build && cd build
+# mkdir build && cd build
 
-cmake ..
+# cmake ..
 
-VERBOSE=1 make -j$(nproc) install
+# VERBOSE=1 make -j$(nproc) install
 
-cd ..
+# cd ..
 
-rm -r build
+# rm -r build

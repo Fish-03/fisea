@@ -15,13 +15,13 @@ rm cuda.exe
 # cp -r "$CUDNN_ROOT"/* "$CUDA_ROOT"
 # rm cudnn.exe
 
-pip install -r requirements.txt
+# pip install -r requirements.txt
 
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release --target install --parallel 6 --verbose
-cd ..
-rm -r build
+# mkdir build
+# cd build
+# cmake ..
+# cmake --build . --config Release --target install --parallel 6 --verbose
+# cd ..
+# rm -r build
 
 # cp "$CUDA_ROOT/bin/cudnn64_8.dll" python/ctranslate2/
