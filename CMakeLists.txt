@@ -14,8 +14,9 @@ project(
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 
-enable_language(CUDA)
+# enable_language(CUDA)
 
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
