@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - runs: chmod +x tools/prepare_linux.sh
+      - run: chmod +x tools/prepare_linux.sh
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
