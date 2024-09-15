@@ -48,9 +48,7 @@ jobs:
         run: pip install cibuildwheel==2.0.0  # 确保使用正确版本
 
       - name: Build wheels
-        run: |
-          export CIBW_ENVIRONMENT="CMAKE_ARGS='-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin'"
-          cibuildwheel --output-dir wheelhouse
+        run: cibuildwheel --output-dir wheelhouse
 
       - uses: actions/upload-artifact@v4
         with:
