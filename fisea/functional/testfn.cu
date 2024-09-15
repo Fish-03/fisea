@@ -1,5 +1,5 @@
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+// #include <cuda_runtime.h> // Why this is not neccessary?
+// #include <device_launch_parameters.h>
 #include <iostream>
 
 #include "testfn.cuh"
