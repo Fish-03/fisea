@@ -15,7 +15,7 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Try to find CUDA. If found, it will be used; otherwise, continue without CUDA.
-find_package(CUDAToolkit)
+find_package(CUDAToolkit OPTIONAL)
 
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
