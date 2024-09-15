@@ -45,7 +45,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*musl*"
-          CIBW_BEFORE_ALL_LINUX: tools/prepare_linux.sh
+          CIBW_BEFORE_ALL_LINUX: sudo /bin/bash tools/prepare_linux.sh
 
       - uses: actions/upload-artifact@v4
         with:
