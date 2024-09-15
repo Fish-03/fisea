@@ -41,19 +41,6 @@ jobs:
           sub-packages: '["nvcc", "cudart"]'
         if: runner.os == 'Linux'
  
-
-      - name: fix cuda runtime
-        run: export CPATH="$CUDA_PATH/targets/x86_64-linux/include:$CPATH" && 
-             export CPLUS_INCLUDE_PATH="$CUDA_PATH/targets/x86_64-linux/include:$CPLUS_INCLUDE_PATH" && 
-             export LD_LIBRARY_PATH="$CUDA_PATH/targets/x86_64-linux/lib:$LD_LIBRARY_PATH" && 
-             echo "CPATH:$CPATH | LD_LIBRARY_PATH:$LD_LIBRARY_PATH | CUDA_PATH:$CUDA_PATH | PATH:$PATH" && 
-             nvcc -V
-        if: runner.os == 'Linux'
-        
-      - name: find libs
-        run: ls $CUDA_PATH/targets && ls $CUDA_PATH/targets/x86_64-linux && ls $CUDA_PATH/targets/x86_64-linux/include
-        if: runner.os == 'Linux'
-        
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
