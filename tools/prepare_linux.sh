@@ -18,12 +18,12 @@ yum install --setopt=obsoletes=0 -y \
     libcudnn8-devel-8.9.7.29-1.cuda12.2 \
     libcublas-devel-12-2-12.2.5.6-1 \
     libnccl-devel-2.19.3-1+cuda12.2
-    
+
 ln -s cuda-12.2 /usr/local/cuda
 
 mkdir build-release && cd build-release
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-msse4.1" -DBUILD_CLI=OFF -DWITH_DNNL=ON -DOPENMP_RUNTIME=COMP -DWITH_CUDA=ON -DWITH_CUDNN=ON -DCUDA_DYNAMIC_LOADING=ON -DCUDA_NVCC_FLAGS="-Xfatbin=-compress-all" -DCUDA_ARCH_LIST="Common"  -DWITH_TENSOR_PARALLEL=ON ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER="/usr/local/cuda/bin" -DCMAKE_CXX_FLAGS="-msse4.1" -DBUILD_CLI=OFF -DWITH_DNNL=ON -DOPENMP_RUNTIME=COMP -DWITH_CUDA=ON -DWITH_CUDNN=ON -DCUDA_DYNAMIC_LOADING=ON -DCUDA_NVCC_FLAGS="-Xfatbin=-compress-all" -DCUDA_ARCH_LIST="Common"  -DWITH_TENSOR_PARALLEL=ON ..
 
 VERBOSE=1 make -j$(nproc) install
 
