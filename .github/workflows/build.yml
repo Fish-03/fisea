@@ -34,7 +34,11 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: fix cuda runtime
-        run: export CPATH="$CUDA_PATH/targets/x86_64-linux/include:$CPATH" && export CPLUS_INCLUDE_PATH="$CUDA_PATH/include:$CPLUS_INCLUDE_PATH" && echo "CPATH:$CPATH \n LD_LIBRARY_PATH:$LD_LIBRARY_PATH \n CUDA_PATH:$CUDA_PATH \n PATH:$PATH" && nvcc -V
+        run: export CPATH="$CUDA_PATH/targets/x86_64-linux/include:$CPATH"
+             export CPLUS_INCLUDE_PATH="$CUDA_PATH/targets/x86_64-linux/include:$CPLUS_INCLUDE_PATH"
+             export LD_LIBRARY_PATH="$CUDA_PATH/targets/x86_64-linux/lib:$LD_LIBRARY_PATH"
+             echo "CPATH:$CPATH \n LD_LIBRARY_PATH:$LD_LIBRARY_PATH \n CUDA_PATH:$CUDA_PATH \n PATH:$PATH"
+             nvcc -V
         if: runner.os == 'Linux'
         
       - name: find libs
