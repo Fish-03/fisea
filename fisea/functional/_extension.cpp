@@ -1,8 +1,11 @@
 #include <pybind11/pybind11.h>
+#include "testfn.h"  // Always include this, regardless of CUDA availability
+
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include "testfn.h"
-#include "testfn.cuh"
+#include "testfn.cuh"  // Only include CUDA-specific headers if CUDA is available
+#endif
 
 namespace py = pybind11;
 
@@ -19,10 +22,9 @@ PYBIND11_MODULE(_cpp_extension, m) {
             sub
             mul
             div
-            hello_from_gpu
-
     )pbdoc";
 
+    // Register the basic math functions
     m.def("add", &add, R"pbdoc(
         Add two numbers
 
@@ -47,7 +49,10 @@ PYBIND11_MODULE(_cpp_extension, m) {
         Some other explanation about the divide function.
     )pbdoc");
 
+#ifdef USE_CUDA
+    // Register the CUDA function only if CUDA is available
     m.def("cuda_test", &call_hello_from_gpu, R"pbdoc(
         Hello from CUDA!
     )pbdoc");
+#endif
 }
