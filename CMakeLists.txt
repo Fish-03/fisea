@@ -15,7 +15,7 @@ project(
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(CUDAToolkit REQUIRED)
-
+# message(STATUS "Is CUDA available? ${CUDA_FOUND}")
 # enable_language(CUDA)
 
 function(add_python_module MODULE_PATH)
@@ -32,10 +32,9 @@ function(add_python_module MODULE_PATH)
                           OUTPUT_NAME "_cpp_extension"
                           )
     target_link_libraries(${MODULE_NAME} PRIVATE pybind11::headers)
-    if(CUDA_FOUND)
-      target_link_libraries(${MODULE_NAME} PRIVATE CUDA::cudart)  # Link CUDA runtime
-      target_compile_definitions(${MODULE_NAME} PRIVATE USE_CUDA)  # Define flag for CUDA support
-    endif()
+    target_link_libraries(${MODULE_NAME} PRIVATE CUDA::cudart)  # Link CUDA runtime
+    target_compile_definitions(${MODULE_NAME} PRIVATE USE_CUDA)  # Define flag for CUDA support
+
     target_link_libraries(${MODULE_NAME} PRIVATE ${MODULE_NAME}_LIB)
     install(TARGETS ${MODULE_NAME} DESTINATION ${MODULE_PATH})
   endif()
