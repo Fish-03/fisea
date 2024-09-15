@@ -42,7 +42,7 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel==2.16.5  # 确保使用正确版本
 
-      - run: export CIBW_ENVIRONMENT="CMAKE_ARGS='-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin'"
+      - run: export CIBW_ENVIRONMENT="CMAKE_ARGS='-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin'" &&
              cibuildwheel --output-dir wheelhouse
       # - name: Build wheels
       #   uses: pypa/cibuildwheel@v2.16.5
