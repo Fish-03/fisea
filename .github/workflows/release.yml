@@ -18,11 +18,8 @@ jobs:
     strategy:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [auto64]
-        include:
-        - os: ubuntu-20.04
-          arch: aarch64
 
     steps:
       - uses: actions/checkout@v4

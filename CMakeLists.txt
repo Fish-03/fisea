@@ -8,17 +8,20 @@ project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 
 set(PROJECT_LANGUAGES CXX)  # Start with just CXX as the default language
 
+find_package(CUDAToolkit)
+
+if(CUDAToolkit_FOUND)
+  list(APPEND PROJECT_LANGUAGES CUDA)
+  enable_language(CUDA)  # Explicitly enable CUDA language
+endif()
+
 # Find the module development requirements (requires FindPython from 3.17 or
 # scikit-build-core's built-in backport)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Try to find CUDA. If found, it will be used; otherwise, continue without CUDA.
-find_package(CUDAToolkit)
 
-if(CUDAToolkit_FOUND)
-  list(APPEND PROJECT_LANGUAGES CUDA)
-endif()
 
 function(add_python_module MODULE_PATH)
   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
