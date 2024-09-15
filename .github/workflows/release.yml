@@ -23,32 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch cuda-toolkit (Linux) ...
-        uses: Jimver/cuda-toolkit@v0.2.16
-        with:
-          cuda: '12.4.1'
-          method: network
-          sub-packages: '["nvcc", "cudart"]'
-        if: runner.os == 'Linux'
-
-      - name: Fetch cuda-toolkit (Windows)...
-        uses: Jimver/cuda-toolkit@v0.2.16
-        with:
-          cuda: '12.4.1'
-          method: network
-          sub-packages: '["nvcc", "cudart", "visual_studio_integration"]'
-        if: runner.os == 'Windows'
-
-      - name: Setup Python ${{ matrix.python-version }}...
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install cibuildwheel
-        run: pip install cibuildwheel==2.0.0  # 确保使用正确版本
-
       - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse
+        uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_ENVIRONMENT_PASS_LINUX: CIBW_ARCHS
+          CIBW_BEFORE_ALL_LINUX: tools/prepare_linux.sh
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          CIBW_SKIP: pp* *-musllinux_*
+          
 
       - uses: actions/upload-artifact@v4
         with:
