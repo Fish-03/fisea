@@ -23,9 +23,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
+      - name: Checkout Repository...
       - uses: actions/checkout@v4
       
-      - name: Fetch CUDA toolkit(Windows)
+      - name: Fetch cuda-toolkit (Windows)...
         uses: Jimver/cuda-toolkit@v0.2.16
         with:
           cuda: '12.4.1'
@@ -33,24 +34,25 @@ jobs:
           sub-packages: '["nvcc", "cudart", "visual_studio_integration"]'
         if: runner.os == 'Windows'
 
-      - name: Fetch CUDA toolkit(Linux)
+      - name: Fetch cuda-toolkit (Linux) ...
         uses: Jimver/cuda-toolkit@v0.2.16
         with:
           cuda: '12.4.1'
           method: network
           sub-packages: '["nvcc", "cudart"]'
         if: runner.os == 'Linux'
- 
+
+      - name: Setup Python ${{ matrix.python-version }}...
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install fisea with requirements
+      - name: Install fisea with requirements...
         run: python -m pip install -e .
 
-      - name: List environment
+      - name: List environment...
         run: python -m pip freeze
 
-      - name: Test build
+      - name: Test build...
         run: |
           python -c "import fisea"
