@@ -12,6 +12,7 @@ sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
 sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
 sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
 yum install --setopt=obsoletes=0 -y \
+    pybind11 \
     cuda-nvcc-12-2-12.2.140-1 \
     cuda-cudart-devel-12-2-12.2.140-1 \
     libcurand-devel-12-2-10.3.3.141-1 \
@@ -29,12 +30,12 @@ nvcc -V
 
 pip install -r requirements.txt
 
-mkdir build-release && cd build-release
+mkdir build && cd build
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-msse4.1" -DBUILD_CLI=OFF -DWITH_DNNL=ON -DOPENMP_RUNTIME=COMP -DWITH_CUDA=ON -DWITH_CUDNN=ON -DCUDA_DYNAMIC_LOADING=ON -DCUDA_NVCC_FLAGS="-Xfatbin=-compress-all" -DCUDA_ARCH_LIST="Common"  -DWITH_TENSOR_PARALLEL=ON ..
+cmake ..
 
 VERBOSE=1 make -j$(nproc) install
 
 cd ..
 
-rm -r build-release
+rm -r build
