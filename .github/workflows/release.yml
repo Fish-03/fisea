@@ -44,7 +44,7 @@ jobs:
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_ENVIRONMENT_LINUX: CUDAToolkit_ROOT='/usr/local/cuda-12.4'
+          CIBW_ENVIRONMENT_LINUX: CUDAToolkit_ROOT='/usr/local/cuda/bin'
           CIBW_SKIP: "*musl*"
           CIBW_BEFORE_ALL: >
             export BUILD_WITH_CUDA=1
