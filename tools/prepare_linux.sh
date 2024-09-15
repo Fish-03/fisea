@@ -3,7 +3,7 @@
 set -e
 set -x
 
-pip install "cmake==3.22.*"
+pip install "cmake==3.22.*" pybind11
 
 # Install CUDA 12.2:
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
