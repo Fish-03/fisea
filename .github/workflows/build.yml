@@ -31,7 +31,7 @@ jobs:
         with:
           cuda: '12.4.1'
           method: network
-          sub-packages: '["nvcc", "cudart"]'
+          sub-packages: '["nvcc", "cudart", "visual_studio_integration"]'
         if: runner.os == 'Linux' || runner.os == 'Windows'
 
       - name: fix cuda runtime
