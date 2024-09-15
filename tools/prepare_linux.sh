@@ -18,6 +18,7 @@ yum install --setopt=obsoletes=0 -y \
     libcudnn8-devel-8.9.7.29-1.cuda12.2 \
     libcublas-devel-12-2-12.2.5.6-1 \
     libnccl-devel-2.19.3-1+cuda12.2
+    
 ln -s cuda-12.2 /usr/local/cuda
 
 mkdir build-release && cd build-release
