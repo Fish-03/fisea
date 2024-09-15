@@ -21,9 +21,9 @@ yum install --setopt=obsoletes=0 -y \
 
 ln -s cuda-12.2 /usr/local/cuda
 
-export $PATH=/usr/local/cuda:$PATH
-export CPATH=/usr/local/cuda/include:$CPATH
-export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+export PATH="/usr/local/cuda:$PATH"
+export CPATH="/usr/local/cuda/include:$CPATH"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
 nvcc -V
 
