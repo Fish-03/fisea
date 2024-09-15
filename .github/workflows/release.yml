@@ -31,7 +31,6 @@ jobs:
           CIBW_ENVIRONMENT_PASS_LINUX: CIBW_ARCHS
           CIBW_BEFORE_ALL_LINUX: tools/prepare_linux.sh
           CIBW_BEFORE_ALL_WINDOWS: bash tools/prepare_windows.sh
-          CIBW_BEFORE_BUILD: pip install -r requirements.txt
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           CIBW_SKIP: pp* *-musllinux_*
