@@ -21,9 +21,15 @@ yum install --setopt=obsoletes=0 -y \
 
 ln -s cuda-12.2 /usr/local/cuda
 
+export $PATH=/usr/local/cuda:$PATH
+export CPATH=/usr/local/cuda/include:$CPATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+nvcc -V
+
 mkdir build-release && cd build-release
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER="/usr/local/cuda/bin" -DCMAKE_CXX_FLAGS="-msse4.1" -DBUILD_CLI=OFF -DWITH_DNNL=ON -DOPENMP_RUNTIME=COMP -DWITH_CUDA=ON -DWITH_CUDNN=ON -DCUDA_DYNAMIC_LOADING=ON -DCUDA_NVCC_FLAGS="-Xfatbin=-compress-all" -DCUDA_ARCH_LIST="Common"  -DWITH_TENSOR_PARALLEL=ON ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-msse4.1" -DBUILD_CLI=OFF -DWITH_DNNL=ON -DOPENMP_RUNTIME=COMP -DWITH_CUDA=ON -DWITH_CUDNN=ON -DCUDA_DYNAMIC_LOADING=ON -DCUDA_NVCC_FLAGS="-Xfatbin=-compress-all" -DCUDA_ARCH_LIST="Common"  -DWITH_TENSOR_PARALLEL=ON ..
 
 VERBOSE=1 make -j$(nproc) install
 
