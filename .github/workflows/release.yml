@@ -19,6 +19,12 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [auto64]
+        include:
+        - os: ubuntu-20.04
+          arch: aarch64
+        - os: macos-12
+          arch: arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +39,7 @@ jobs:
           CIBW_BEFORE_ALL_WINDOWS: bash tools/prepare_windows.sh
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_SKIP: pp* *-musllinux_*
           CIBW_ENVIRONMENT: |
             PATH=/usr/local/cuda/bin:$PATH
