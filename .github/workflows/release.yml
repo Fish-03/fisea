@@ -44,10 +44,11 @@ jobs:
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_ENVIRONMENT_LINUX: CUDAToolkit_ROOT='/usr/local/cuda';WITH_CUDA='ON'
           CIBW_SKIP: "*musl*"
           CIBW_BEFORE_ALL: >
-            export CUDAToolkit_ROOT='/usr/local/cuda'
-            export BUILD_WITH_CUDA=1
+            export BUILD_WITH_CUDA=1 &&
+            export PATH=$PATH:/usr/local/cuda/bin
 
       - uses: actions/upload-artifact@v4
         with:
