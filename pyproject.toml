@@ -45,7 +45,7 @@ testpaths = ["tests"]
 
 
 [tool.cibuildwheel]
-archs = ["Linux", "Windows"]
+archs = ["auto"]
 build-frontend = "build[uv]"
 test-command = "pytest {project}/tests"
 test-extras = ["test"]
