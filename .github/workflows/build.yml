@@ -1,4 +1,4 @@
-name: build
+name: Build
 
 on:
   pull_request:
@@ -26,6 +26,7 @@ jobs:
       - name: Checkout Repository...
       - uses: actions/checkout@v4
       
+      # see https://github.com/Jimver/cuda-toolkit?tab=readme-ov-file#method for sub-packages and non-cuda-sub-packages
       - name: Fetch cuda-toolkit (Windows)...
         uses: Jimver/cuda-toolkit@v0.2.16
         with:
