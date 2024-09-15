@@ -25,14 +25,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Fetch CUDA toolkit
+      - name: Fetch CUDA toolkit(Windows)
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
         with:
           cuda: '12.4.1'
           method: network
           sub-packages: '["nvcc", "cudart", "visual_studio_integration"]'
-        if: runner.os == 'Linux' || runner.os == 'Windows'
+        if: runner.os == 'Windows'
+
+      - name: Fetch CUDA toolkit(Linux)
+        uses: Jimver/cuda-toolkit@v0.2.16
+        id: cuda-toolkit
+        with:
+          cuda: '12.4.1'
+          method: network
+          sub-packages: '["nvcc", "cudart"]'
+        if: runner.os == 'Linux'
+ 
 
       - name: fix cuda runtime
         run: export CPATH="$CUDA_PATH/targets/x86_64-linux/include:$CPATH" && 
