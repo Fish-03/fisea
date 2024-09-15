@@ -43,12 +43,15 @@ filterwarnings = [
 ]
 testpaths = ["tests"]
 
-
 [tool.cibuildwheel]
-archs = ["auto"]
-build-frontend = "build"
+build-frontend = "build[uv]"
 test-command = "pytest {project}/tests"
 test-extras = ["test"]
+
+[tool.cibuildwheel.pyodide]
+environment.CFLAGS = "-fexceptions"
+environment.LDFLAGS = "-fexceptions"
+build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
 
 [tool.ruff.lint]
 extend-select = [
