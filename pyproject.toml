@@ -45,6 +45,7 @@ testpaths = ["tests"]
 
 
 [tool.cibuildwheel]
+archs = ["Linux", "Windows"]
 build-frontend = "build[uv]"
 test-command = "pytest {project}/tests"
 test-extras = ["test"]
@@ -86,44 +87,3 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
-
-[tool.cibuildwheel]
-build = "*"
-skip = ""
-test-skip = ""
-free-threaded-support = false
-
-archs = ["Linux", "Windows"]
-build-frontend = "default"
-config-settings = {}
-dependency-versions = "pinned"
-environment = {}
-environment-pass = []
-build-verbosity = 0
-
-before-all = ""
-before-build = ""
-repair-wheel-command = ""
-
-test-command = ""
-before-test = ""
-test-requires = []
-test-extras = []
-
-container-engine = "docker"
-
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
-manylinux-ppc64le-image = "manylinux2014"
-manylinux-s390x-image = "manylinux2014"
-manylinux-pypy_x86_64-image = "manylinux2014"
-manylinux-pypy_i686-image = "manylinux2014"
-manylinux-pypy_aarch64-image = "manylinux2014"
-
-[tool.cibuildwheel.linux]
-repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
-
-[tool.cibuildwheel.windows]
-
-[tool.cibuildwheel.pyodide]
