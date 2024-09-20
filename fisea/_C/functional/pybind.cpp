@@ -1,30 +1,16 @@
 #include <pybind11/pybind11.h>
-#include "testfn.h"  // Always include this, regardless of CUDA availability
+#include "testfn.h"
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include "testfn.cuh"  // Only include CUDA-specific headers if CUDA is available
+
+#include "testfn.cuh"
 #endif
 
 namespace py = pybind11;
-
-
-
-PYBIND11_MODULE(_cpp_extension, m) {
-    m.doc() = R"pbdoc(
-        Pybind11 example plugin
-        -----------------------
-
-        .. currentmodule:: fisea.functional._cpp_extension
-
-        .. autosummary::
-           :toctree: _generate
-            add
-            sub
-            mul
-            div
-    )pbdoc";
+void init_module(py::module_ &m) {
+    m.doc() = "";
 
     // Register the basic math functions
     m.def("add", &add, R"pbdoc(
@@ -56,7 +42,6 @@ PYBIND11_MODULE(_cpp_extension, m) {
     m.def("cuda_test", &call_hello_from_gpu, R"pbdoc(
         Hello from CUDA!
     )pbdoc");
-
-
 #endif
+    // 绑定更多 functional.cpp 中的函数或类
 }
