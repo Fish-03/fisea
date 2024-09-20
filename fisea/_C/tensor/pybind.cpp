@@ -6,6 +6,8 @@
 
 #endif
 
-void init_module(py::module_ &m) {
+namespace py = pybind11;
+
+void init_tensor(py::module_ &m) {
     m.doc() = "";
 }

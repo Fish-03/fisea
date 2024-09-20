@@ -1,23 +1,26 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#ifdef USE_CUDA
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#endif
-
 namespace py = pybind11;
 
-void init_module(py::module_ &);
+extern void init_functional(py::module_ &m);
+extern void init_tensor(py::module_ &m);
+// extern int add(int i, int j);
 
-PYBIND11_MODULE(project_root, m) {
+PYBIND11_MODULE(_C, m) {
     m.doc() = "Project Root Module";  // 模块文档字符串
 
     // 创建 functional 子模块
-    py::module_ functional_module = m.def_submodule("functional", "Functional submodule");
-    init_module(functional_module);
+    py::module_ m1 = m.def_submodule("functional", "Functional submodule");
+    init_functional(m1);
+    // m1.doc() = "Functional submodule";  // 子模块文档字符串
+    // m1.def("add", &add, "A function which adds two numbers");
+    
+    py::module_ m2 = m.def_submodule("tensor", "Tensor submodule");
+    init_tensor(m2);
+    // m2.doc() = "Tensor submodule";  // 子模块文档字符串
 
-    // 创建 tensor 子模块
-    py::module_ tensor_module = m.def_submodule("tensor", "Tensor submodule");
-    init_module(tensor_module);
+    // // 创建 tensor 子模块
+    // py::module_ m2 = m.def_submodule("tensor", "Tensor submodule");
+    // init_tensor(m2);
 }

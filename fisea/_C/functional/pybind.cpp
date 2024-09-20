@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+
 #include "testfn.h"
 
 #ifdef USE_CUDA
@@ -9,7 +10,8 @@
 #endif
 
 namespace py = pybind11;
-void init_module(py::module_ &m) {
+
+void init_functional(py::module_ &m) {
     m.doc() = "";
 
     // Register the basic math functions
