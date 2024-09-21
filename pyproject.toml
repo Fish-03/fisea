@@ -45,6 +45,8 @@ testpaths = ["tests"]
 
 [tool.cibuildwheel]
 build-frontend = "build"
+test-command = "pytest {project}/tests"
+test-extras = ["test"]
 
 [tool.cibuildwheel.pyodide]
 environment.CFLAGS = "-fexceptions"
