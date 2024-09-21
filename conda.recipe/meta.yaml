@@ -1,6 +1,6 @@
 package:
   name: fisea
-  version: "{{ environ['GIT_DESCRIBE_TAG'] }}"
+  version: "{{ SKBUILD_PROJECT_VERSION }}"
 
 source:
   path: ..
