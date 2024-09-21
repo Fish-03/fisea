@@ -1,0 +1,49 @@
+name: Conda
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.platform }}
+
+    # The setup-miniconda action needs this to activate miniconda
+    defaults:
+      run:
+        shell: "bash -l {0}"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get conda
+        uses: conda-incubator/setup-miniconda@v3.0.4
+        with:
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge
+          environment-file: conda.recipe/build_env.yaml
+
+      - name: Prepare
+        run: conda install conda-build conda-verify pytest
+
+      - name: Build but do not upload the conda packages
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.3.0
+        with:
+          meta_yaml_dir: conda.recipe
+          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          platform_linux-64: true
+          platform_osx-64: true
+          platform_win-64: true
+          user: seelooooo
+          label: auto
+          upload: true
+          token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
