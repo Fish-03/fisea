@@ -3,8 +3,7 @@ package:
   version: {{ GIT_DESCRIBE_TAG }}
 
 source:
-  path: ..
-  git_rev: {{ GIT_DESCRIBE_TAG }}
+  path: ../../
 
 build:
   number: 0
