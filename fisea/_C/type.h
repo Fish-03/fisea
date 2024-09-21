@@ -1,0 +1,113 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <stdexcept>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
+using std::string;
+
+namespace fisea
+{
+    enum class Device
+    {
+        CPU,
+        CUDA,
+    };
+
+    // dtype type
+    enum class Dtype
+    {
+        INT,
+        FLOAT,
+        DOUBLE,
+    };
+
+    using Shape = std::vector<int>;
+
+    Device device_from_string(const string &device_str);
+    Dtype dtype_from_string(const string &dtype_str);
+    string device_to_string(Device device);
+    string dtype_to_string(Dtype dtype);
+    size_t dtype_size(Dtype dtype);
+}
+
+fisea::Dtype fisea::dtype_from_string(const string &dtype_str)
+{
+    if (dtype_str == "int" || dtype_str == "INT")
+    {
+        return fisea::Dtype::INT;
+    }
+    else if (dtype_str == "float" || dtype_str == "FLOAT")
+    {
+        return fisea::Dtype::FLOAT;
+    }
+    else if (dtype_str == "double" || dtype_str == "DOUBLE")
+    {
+        return fisea::Dtype::DOUBLE;
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid dtype string");
+    }
+}
+
+fisea::Device fisea::device_from_string(const string &device_str)
+{
+    if (device_str == "cpu" || device_str == "CPU")
+    {
+        return fisea::Device::CPU;
+    }
+    else if (device_str == "cuda" || device_str == "CUDA")
+    {
+        return fisea::Device::CUDA;
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid device string");
+    }
+}
+
+string fisea::device_to_string(Device device)
+{
+    switch (device)
+    {
+    case Device::CPU:
+        return "cpu";
+    case Device::CUDA:
+        return "cuda";
+    default:
+        throw std::invalid_argument("Invalid device");
+    }
+}
+
+string fisea::dtype_to_string(Dtype dtype)
+{
+    switch (dtype)
+    {
+    case Dtype::INT:
+        return "int";
+    case Dtype::FLOAT:
+        return "float";
+    case Dtype::DOUBLE:
+        return "double";
+    default:
+        throw std::invalid_argument("Invalid dtype");
+    }
+}
+
+size_t fisea::dtype_size(Dtype dtype)
+{
+    switch (dtype)
+    {
+    case Dtype::INT:
+        return sizeof(int);
+    case Dtype::FLOAT:
+        return sizeof(float);
+    case Dtype::DOUBLE:
+        return sizeof(double);
+    default:
+        throw std::invalid_argument("Invalid dtype");
+    }
+}

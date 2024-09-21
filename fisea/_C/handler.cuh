@@ -1,5 +1,4 @@
-#ifndef HANDLER_CUH
-#define HANDLER_CUH
+#pragma once
 
 const int kCudaThreadsNum = 512;
 inline int CudaGetBlocks(const int N) {
@@ -10,5 +9,3 @@ inline int CudaGetBlocks(const int N) {
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; \
          i < (n);                                       \
          i += blockDim.x * gridDim.x)
-
-#endif
