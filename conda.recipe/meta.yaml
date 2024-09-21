@@ -1,9 +1,9 @@
 package:
   name: fisea
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: {{ GIT_DESCRIBE_TAG }}.{{ GIT_BUILD_STR }}
 
 source:
-  path: ../../
+  path: ../
 
 build:
   number: 0
