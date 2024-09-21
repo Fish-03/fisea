@@ -30,7 +30,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
-          environment-file: conda.recipe/build_env.yaml
 
       - name: Prepare
         run: conda install conda-build conda-verify pytest
