@@ -1,6 +1,6 @@
 package:
   name: fisea
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: "{{ environ['GIT_DESCRIBE_TAG'] }}"
 
 source:
   path: ..
