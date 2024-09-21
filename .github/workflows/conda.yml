@@ -42,7 +42,7 @@ jobs:
           platform_linux-64: true
           platform_osx-64: true
           platform_win-64: true
-          user: seelooooo
+          user: supercgor
           label: auto
           upload: true
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret

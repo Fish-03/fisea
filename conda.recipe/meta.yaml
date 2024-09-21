@@ -1,9 +1,10 @@
 package:
   name: fisea
-  version: "{{ SKBUILD_PROJECT_VERSION }}"
+  version: {{ GIT_DESCRIBE_TAG }}
 
 source:
   path: ..
+  git_rev: {{ GIT_DESCRIBE_TAG }}
 
 build:
   number: 0
