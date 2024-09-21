@@ -32,7 +32,7 @@ jobs:
           channels: conda-forge
 
       - name: Prepare
-        run: conda install conda-build conda-verify pytest
+        run: conda install conda-build conda-verify pytest && export GIT_DESCRIBE_TAG=$(git describe --tags)
 
       - name: Build but do not upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.3.0
