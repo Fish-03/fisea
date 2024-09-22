@@ -53,6 +53,11 @@ fisea::Dtype fisea::dtype_from_string(const string &dtype_str)
     }
 }
 
+fisea::Dtype fisea::dtype_from_string(fisea::Dtype dtype)
+{
+    return dtype;
+}
+
 fisea::Device fisea::device_from_string(const string &device_str)
 {
     if (device_str == "cpu" || device_str == "CPU")
@@ -69,6 +74,11 @@ fisea::Device fisea::device_from_string(const string &device_str)
     }
 }
 
+fisea::Device fisea::device_from_string(fisea::Device device)
+{
+    return device;
+}
+
 string fisea::device_to_string(Device device)
 {
     switch (device)
@@ -82,6 +92,11 @@ string fisea::device_to_string(Device device)
     }
 }
 
+string fisea::device_to_string(string device)
+{
+    return device;
+}
+
 string fisea::dtype_to_string(Dtype dtype)
 {
     switch (dtype)
@@ -93,8 +108,13 @@ string fisea::dtype_to_string(Dtype dtype)
     case Dtype::DOUBLE:
         return "double";
     default:
-        throw std::invalid_argument("Invalid dtype");
+        throw std::invalid_argument("Invalid dtype: " + std::to_string(static_cast<int>(dtype)));
     }
+}
+
+string fisea::dtype_to_string(string dtype)
+{
+    return dtype;
 }
 
 size_t fisea::dtype_size(Dtype dtype)
@@ -110,4 +130,9 @@ size_t fisea::dtype_size(Dtype dtype)
     default:
         throw std::invalid_argument("Invalid dtype");
     }
+}
+
+size_t fisea::dtype_size(string dtype)
+{
+    return dtype_size(dtype_from_string(dtype));
 }
