@@ -5,8 +5,11 @@
 #include "../const.h"
 #include "../memory.cuh"
 
+#include <iostream>
+#include <string>
 #include <memory>
 #include <cstring> // for memcpy
+#include <random>
 
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
@@ -15,9 +18,8 @@
 
 namespace fisea
 {
-    template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-    Tensor::Tensor(fisea::Shape shape, void *data, DeviceType device, DtypeType dtype)
-        : shape_(shape), device_(fisea::device_from_string(device)), dtype_(fisea::dtype_from_string(dtype)), data_(nullptr), grad_(nullptr), data_size_(shape.size() * fisea::dtype_size(dtype_))
+    Tensor::Tensor(fisea::Shape shape, void *data, fisea::Device device, fisea::Dtype dtype)
+        : shape_(shape), device_(device), dtype_(dtype), data_(nullptr), grad_(nullptr), data_size_(shape.size() * fisea::dtype_size(dtype_))
     {
         if (data != nullptr)
         {
@@ -35,6 +37,21 @@ namespace fisea
             }
             // else Error
         }
+    }
+
+    Tensor::Tensor(fisea::Shape shape, void *data, std::string device, fisea::Dtype dtype)
+        : Tensor(shape, data, fisea::device_from_string(device), dtype)
+    {
+    }
+
+    Tensor::Tensor(fisea::Shape shape, void *data, fisea::Device device, std::string dtype)
+        : Tensor(shape, data, device, fisea::dtype_from_string(dtype))
+    {
+    }
+
+    Tensor::Tensor(fisea::Shape shape, void *data, std::string device, std::string dtype)
+        : Tensor(shape, data, fisea::device_from_string(device), fisea::dtype_from_string(dtype))
+    {
     }
 
     // 析构函数，注意 data_ 不需要释放，因为 std::shared_ptr 会自动处理
@@ -113,8 +130,6 @@ namespace fisea
         {
             throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
         }
-
-
     }
 
     Tensor Tensor::to_float()
@@ -178,43 +193,87 @@ namespace fisea
         return out;
     }
 
-    template <typename DtypeType>
-    void Tensor::fill_(DtypeType value)
+    void Tensor::fill_(float value)
     {
-        //TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
+        // TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
         if (this->device_ == fisea::Device::CPU)
         {
-            if (this->dtype_ == fisea::Dtype::INT){
-                memset(this->data_.get(), (int)value, this->data_size_);
-            }
-            else if (this->dtype_ == fisea::Dtype::FLOAT){
-                memset(this->data_.get(), (float)value, this->data_size_);
-            }
-            else{
+            switch (this->dtype_)
+            {
+            case fisea::Dtype::INT:
+                memset(this->data_.get(), static_cast<int>(value), this->data_size_);
+            case fisea::Dtype::FLOAT:
+                memset(this->data_.get(), value, this->data_size_);
+            default:
                 throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
             }
         }
         else if (this->device_ == fisea::Device::CUDA)
         {
-            CHECK_CUDA_ENABLED();
-            if (this->dtype_ == fisea::Dtype::INT){
-                cudaMemset(this->data_.get(), (int)value, this->data_size_);
-            }
-            else if (this->dtype_ == fisea::Dtype::FLOAT){
-                cudaMemset(this->data_.get(), (float)value, this->data_size_);
-            }
-            else{
+            switch (this->dtype_)
+            {
+            case fisea::Dtype::INT:
+                cudaMemset(this->data_.get(), static_cast<int>(value), this->data_size_);
+            case fisea::Dtype::FLOAT:
+                cudaMemset(this->data_.get(), value, this->data_size_);
+            default:
                 throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
             }
         }
-        else
+    }
+
+    void Tensor::fill_(int value)
+    {
+        // TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
+        if (this->device_ == fisea::Device::CPU)
         {
-            throw std::runtime_error("Unknown device type.");
+            switch (this->dtype_)
+            {
+            case fisea::Dtype::INT:
+                memset(this->data_.get(), value, this->data_size_);
+            case fisea::Dtype::FLOAT:
+                memset(this->data_.get(), static_cast<float>(value), this->data_size_);
+            default:
+                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+            }
+        }
+        else if (this->device_ == fisea::Device::CUDA)
+        {
+            switch (this->dtype_)
+            {
+            case fisea::Dtype::INT:
+                cudaMemset(this->data_.get(), value, this->data_size_);
+            case fisea::Dtype::FLOAT:
+                cudaMemset(this->data_.get(), static_cast<float>(value), this->data_size_);
+            default:
+                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+            }
         }
     }
 
-    template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-    Tensor Tensor::zeros(fisea::Shape shape, DeviceType device, DtypeType dtype)
+    void Tensor::zero_()
+    {
+        this->fill_(0);
+    }
+
+    void Tensor::one_()
+    {
+        this->fill_(1);
+    }
+
+    // TODO 種子設定
+    void Tensor::randn_()
+    {
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::normal_distribution<float> distribution(0, 1);
+        for (size_t i = 0; i < this->shape_.size(); i++)
+        {
+            ((float *)this->data_.get())[i] = distribution(generator);
+        }
+    }
+
+    Tensor Tensor::zeros(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype)
     {
         Tensor out = Tensor(shape, nullptr, device, dtype);
         if (out.device_ == fisea::Device::CPU)
@@ -233,8 +292,22 @@ namespace fisea
         return out;
     }
 
-    template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-    Tensor Tensor::ones(fisea::Shape shape, DeviceType device, DtypeType dtype)
+    Tensor Tensor::zeros(fisea::Shape shape, fisea::Device device, std::string dtype)
+    {
+        return Tensor::zeros(shape, device, fisea::dtype_from_string(dtype));
+    }
+
+    Tensor Tensor::zeros(fisea::Shape shape, std::string device, fisea::Dtype dtype)
+    {
+        return Tensor::zeros(shape, fisea::device_from_string(device), dtype);
+    }
+
+    Tensor Tensor::zeros(fisea::Shape shape, std::string device, std::string dtype)
+    {
+        return Tensor::zeros(shape, fisea::device_from_string(device), fisea::dtype_from_string(dtype));
+    }
+
+    Tensor Tensor::ones(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype)
     {
         Tensor out = Tensor(shape, nullptr, device, dtype);
         if (out.device_ == fisea::Device::CPU)
@@ -253,11 +326,25 @@ namespace fisea
         return out;
     }
 
-    template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-    Tensor Tensor::randn(fisea::Shape shape, DeviceType device, DtypeType dtype)
+    Tensor Tensor::ones(fisea::Shape shape, fisea::Device device, std::string dtype)
+    {
+        return Tensor::ones(shape, device, fisea::dtype_from_string(dtype));
+    }
+
+    Tensor Tensor::ones(fisea::Shape shape, std::string device, fisea::Dtype dtype)
+    {
+        return Tensor::ones(shape, fisea::device_from_string(device), dtype);
+    }
+
+    Tensor Tensor::ones(fisea::Shape shape, std::string device, std::string dtype)
+    {
+        return Tensor::ones(shape, fisea::device_from_string(device), fisea::dtype_from_string(dtype));
+    }
+
+    Tensor Tensor::randn(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype)
     {
         Tensor out = Tensor(shape, nullptr, device, dtype);
-        //TODO 這個實現是有問題的
+        // TODO 這個實現是有問題的
         if (out.device_ == fisea::Device::CPU)
         {
             for (size_t i = 0; i < out.shape_.size(); i++)
@@ -280,10 +367,18 @@ namespace fisea
         return out;
     }
 
+    Tensor Tensor::randn(fisea::Shape shape, fisea::Device device, std::string dtype)
+    {
+        return Tensor::randn(shape, device, fisea::dtype_from_string(dtype));
+    }
 
-    template Tensor Tensor::zeros<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
-    template Tensor Tensor::ones<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
-    template Tensor Tensor::randn<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
+    Tensor Tensor::randn(fisea::Shape shape, std::string device, fisea::Dtype dtype)
+    {
+        return Tensor::randn(shape, fisea::device_from_string(device), dtype);
+    }
 
-
+    Tensor Tensor::randn(fisea::Shape shape, std::string device, std::string dtype)
+    {
+        return Tensor::randn(shape, fisea::device_from_string(device), fisea::dtype_from_string(dtype));
+    }
 }

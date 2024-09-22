@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include <stdexcept>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -23,7 +24,7 @@ namespace fisea
         FLOAT,
         DOUBLE,
     };
-
+    
     using Shape = std::vector<int>;
 
     Device device_from_string(const string &device_str);
