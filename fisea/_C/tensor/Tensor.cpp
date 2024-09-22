@@ -216,7 +216,7 @@ namespace fisea
     template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
     Tensor Tensor::zeros(fisea::Shape shape, DeviceType device, DtypeType dtype)
     {
-        Tensor out = Tensor(nullptr, shape, device, dtype);
+        Tensor out = Tensor(shape, nullptr, device, dtype);
         if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 0, out.data_size_);
@@ -236,7 +236,7 @@ namespace fisea
     template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
     Tensor Tensor::ones(fisea::Shape shape, DeviceType device, DtypeType dtype)
     {
-        Tensor out = Tensor(nullptr, shape, device, dtype);
+        Tensor out = Tensor(shape, nullptr, device, dtype);
         if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 1, out.data_size_);
@@ -256,7 +256,7 @@ namespace fisea
     template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
     Tensor Tensor::randn(fisea::Shape shape, DeviceType device, DtypeType dtype)
     {
-        Tensor out = Tensor(nullptr, shape, device, dtype);
+        Tensor out = Tensor(shape, nullptr, device, dtype);
         //TODO 這個實現是有問題的
         if (out.device_ == fisea::Device::CPU)
         {
@@ -279,4 +279,11 @@ namespace fisea
         }
         return out;
     }
+
+
+    template Tensor Tensor::zeros<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
+    template Tensor Tensor::ones<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
+    template Tensor Tensor::randn<fisea::Device, fisea::Dtype>(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype);
+
+
 }
