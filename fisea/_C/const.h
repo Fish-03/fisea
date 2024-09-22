@@ -1,9 +1,5 @@
 #pragma once
 
-namespace fisea {
-    #ifdef USE_CUDA
-    const bool USE_CUDA = true;
-    #else
-    const bool USE_CUDA = false;
-    #endif
-}
+#ifndef USE_CUDA
+#define USE_CUDA false
+#endif

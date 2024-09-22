@@ -1,6 +1,7 @@
 #pragma once
 
 const int kCudaThreadsNum = 512;
+
 inline int CudaGetBlocks(const int N) {
     return (N + kCudaThreadsNum - 1) / kCudaThreadsNum;
 }

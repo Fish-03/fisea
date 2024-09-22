@@ -1,4 +1,6 @@
+
 #include "Tensor.h"
+#include "../type.h"
 #include "../handler.h"
 #include "../const.h"
 #include "../memory.cuh"
@@ -14,7 +16,7 @@
 namespace fisea
 {
     template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-    Tensor::Tensor(void *data, fisea::Shape shape, DeviceType device, DtypeType dtype)
+    Tensor::Tensor(fisea::Shape shape, void *data, DeviceType device, DtypeType dtype)
         : shape_(shape), device_(fisea::device_from_string(device)), dtype_(fisea::dtype_from_string(dtype)), data_(nullptr), grad_(nullptr), data_size_(shape.size() * fisea::dtype_size(dtype_))
     {
         if (data != nullptr)
@@ -50,7 +52,7 @@ namespace fisea
         else if (this->device_ == fisea::Device::CUDA)
         {
             CHECK_CUDA_ENABLED();
-            Tensor out = Tensor(nullptr, this->shape_, fisea::Device::CPU, this->dtype_);
+            Tensor out = Tensor(this->shape_, nullptr, fisea::Device::CPU, this->dtype_);
             cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToHost);
             return out;
         }
@@ -69,7 +71,7 @@ namespace fisea
         else if (this->device_ == fisea::Device::CPU)
         {
             CHECK_CUDA_ENABLED();
-            Tensor out = Tensor(nullptr, this->shape_, fisea::Device::CUDA, this->dtype_);
+            Tensor out = Tensor(this->shape_, nullptr, fisea::Device::CUDA, this->dtype_);
             cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyHostToDevice);
             return out;
         }
@@ -87,7 +89,7 @@ namespace fisea
         }
         else if (this->dtype_ == fisea::Dtype::FLOAT)
         {
-            Tensor out = Tensor(nullptr, this->shape_, this->device_, fisea::Dtype::INT);
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::INT);
             if (this->device_ == fisea::Device::CPU)
             // TODO: 這種做法效率應該很低?
             {
@@ -95,10 +97,12 @@ namespace fisea
                 {
                     ((int *)out.data_.get())[i] = (int)((float *)this->data_.get())[i];
                 }
+                return out;
             }
             else if (this->device_ == fisea::Device::CUDA)
             {
                 cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
+                return out;
             }
             else
             {
@@ -109,6 +113,8 @@ namespace fisea
         {
             throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
         }
+
+
     }
 
     Tensor Tensor::to_float()
@@ -119,7 +125,7 @@ namespace fisea
         }
         else if (this->dtype_ == fisea::Dtype::INT)
         {
-            Tensor out = Tensor(nullptr, this->shape_, this->device_, fisea::Dtype::FLOAT);
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::FLOAT);
             if (this->device_ == fisea::Device::CPU)
             // TODO: 這種做法效率應該很低?
             {
@@ -127,10 +133,12 @@ namespace fisea
                 {
                     ((float *)out.data_.get())[i] = (float)((int *)this->data_.get())[i];
                 }
+                return out;
             }
             else if (this->device_ == fisea::Device::CUDA)
             {
                 cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
+                return out;
             }
             else
             {
@@ -147,14 +155,14 @@ namespace fisea
     {
         if (this->device_ == fisea::Device::CPU)
         {
-            Tensor out = Tensor(nullptr, this->shape_, this->device_, this->dtype_);
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, this->dtype_);
             memcpy(out.data_.get(), this->data_.get(), this->data_size_);
             return out;
         }
         else if (this->device_ == fisea::Device::CUDA)
         {
             CHECK_CUDA_ENABLED();
-            Tensor out = Tensor(nullptr, this->shape_, this->device_, this->dtype_);
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, this->dtype_);
             cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
             return out;
         }
@@ -166,7 +174,7 @@ namespace fisea
 
     Tensor Tensor::from(Tensor other)
     {
-        Tensor out = Tensor(other.data_.get(), other.shape_, other.device_, other.dtype_);
+        Tensor out = Tensor(other.shape_, other.data_.get(), other.device_, other.dtype_);
         return out;
     }
 
@@ -209,7 +217,7 @@ namespace fisea
     Tensor Tensor::zeros(fisea::Shape shape, DeviceType device, DtypeType dtype)
     {
         Tensor out = Tensor(nullptr, shape, device, dtype);
-        if (out->device_ == fisea::Device::CPU)
+        if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 0, out.data_size_);
         }
@@ -229,7 +237,7 @@ namespace fisea
     Tensor Tensor::ones(fisea::Shape shape, DeviceType device, DtypeType dtype)
     {
         Tensor out = Tensor(nullptr, shape, device, dtype);
-        if (out->device_ == fisea::Device::CPU)
+        if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 1, out.data_size_);
         }
@@ -250,9 +258,9 @@ namespace fisea
     {
         Tensor out = Tensor(nullptr, shape, device, dtype);
         //TODO 這個實現是有問題的
-        if (out->device_ == fisea::Device::CPU)
+        if (out.device_ == fisea::Device::CPU)
         {
-            for (size_t i = 0; i < out->shape_.size(); i++)
+            for (size_t i = 0; i < out.shape_.size(); i++)
             {
                 ((float *)out.data_.get())[i] = (float)rand() / RAND_MAX;
             }
@@ -260,7 +268,7 @@ namespace fisea
         else if (device == fisea::Device::CUDA)
         {
             CHECK_CUDA_ENABLED();
-            for (size_t i = 0; i < out->shape_.size(); i++)
+            for (size_t i = 0; i < out.shape_.size(); i++)
             {
                 ((float *)out.data_.get())[i] = (float)rand() / RAND_MAX;
             }

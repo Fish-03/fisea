@@ -30,7 +30,7 @@ if(CUDAToolkit_FOUND)
 
   python_add_library(_C MODULE ${SOURCES} WITH_SOABI)
 
-  target_compile_definitions(_C PRIVATE USE_CUDA)
+  target_compile_definitions(_C PRIVATE USE_CUDA=1)
   set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON OUTPUT_NAME "_C")
   target_link_libraries(_C PRIVATE pybind11::headers)
   target_link_libraries(_C PRIVATE CUDA::cudart)

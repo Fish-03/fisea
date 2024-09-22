@@ -1,8 +1,9 @@
 #include <pybind11/pybind11.h>
 
 #include "testfn.h"
+#include "../const.h"
 
-#ifdef USE_CUDA
+#if USE_CUDA
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -39,7 +40,7 @@ void init_functional(py::module_ &m) {
         Some other explanation about the divide function.
     )pbdoc");
 
-#ifdef USE_CUDA
+#if USE_CUDA
     // Register the CUDA function only if CUDA is available
     m.def("cuda_test", &call_hello_from_gpu, R"pbdoc(
         Hello from CUDA!

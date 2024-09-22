@@ -13,7 +13,7 @@ namespace fisea
     public:
         // 普通的建構需要將 data_ 複製一份, 這樣可以避免 data_ 的生命週期問題
         template <typename DeviceType = fisea::Device, typename DtypeType = fisea::Dtype>
-        Tensor(void *data = nullptr, fisea::Shape shape, DeviceType device = fisea::Device::CPU, DtypeType dtype = fisea::Dtype::FLOAT);
+        Tensor(fisea::Shape shape, void *data = nullptr, DeviceType device = fisea::Device::CPU, DtypeType dtype = fisea::Dtype::FLOAT);
 
         ~Tensor(); // 不用釋放 data_ 
 

@@ -1,9 +1,8 @@
 #include <pybind11/pybind11.h>
 
-#ifdef USE_CUDA
+#if USE_CUDA
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-
 #endif
 
 namespace py = pybind11;

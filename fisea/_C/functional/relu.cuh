@@ -1,5 +1,3 @@
 #pragma once
 
-__global__ void helloFromGPU();
-void call_hello_from_gpu();
-
+__global__ void relu_gpu(float* in, float* out, int n);
