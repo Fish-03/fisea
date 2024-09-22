@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
-#include "../type.h"
 #include <memory>
+
+#include "../type.h"
+#include "../memory.cuh"
 
 namespace fisea
 {
@@ -12,6 +14,8 @@ namespace fisea
         // 普通的建構需要將 data_ 複製一份, 這樣可以避免 data_ 的生命週期問題
         Tensor(void *data = nullptr, fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT);
         Tensor(void *data = nullptr, fisea::Shape shape, std::string device = "cpu", std::string dtype = "float");
+        Tensor(void *data = nullptr, fisea::Shape shape, std::string device = "cpu", fisea::Dtype dtype = fisea::Dtype::FLOAT);
+        Tensor(void *data = nullptr, fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float");
         ~Tensor(); // 不用釋放 data_ 
 
         void from(void *data); //TODO 利用這個函數可以不複制地建構 data_ 但是要注意 data_ 的生命週期, 比如from numpy array, 這個可以不用實現先
