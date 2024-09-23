@@ -1,20 +1,15 @@
-
-#include "Tensor.h"
-#include "../type.h"
-#include "../handler.h"
-#include "../const.h"
-#include "../memory.cuh"
-
 #include <iostream>
 #include <string>
 #include <memory>
 #include <cstring> // for memcpy
 #include <random>
 
-#ifdef USE_CUDA
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#endif
+#include "../type.h"
+#include "../handler.h"
+#include "../const.h"
+#include "../memory.cuh"
+
+#include "Tensor.h"
 
 namespace fisea
 {
@@ -26,13 +21,14 @@ namespace fisea
 
             if (device_ == fisea::Device::CPU)
             {
-                std::shared_ptr data_ = std::shared_ptr<void *>(new void *[data_size_]);
+                // 用char (1字節) 來進行多態，然後通過 fisea::Dtype 來決定每個元素的解析方式
+                data_ = std::shared_ptr<void>(new char[data_size_], std::default_delete<char[]>());
                 memcpy(data_.get(), data, data_size_);
             }
             else if (device_ == fisea::Device::CUDA)
             {
                 CHECK_CUDA_ENABLED();
-                std::shared_ptr data_ = std::shared_ptr<void *>(cuda::cuMalloc<void *>(data_size_), cuda::cuDeleter<void *>());
+                data_ = std::shared_ptr<void>(cuda::cuMalloc<char>(data_size_), cuda::cuDeleter<char>());
                 cudaMemcpy(data_.get(), data, data_size_, cudaMemcpyHostToDevice);
             }
             // else Error
@@ -98,6 +94,7 @@ namespace fisea
         }
     }
 
+    //TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
     Tensor Tensor::to_int()
     {
         if (this->dtype_ == fisea::Dtype::INT)
@@ -132,6 +129,7 @@ namespace fisea
         }
     }
 
+    //TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
     Tensor Tensor::to_float()
     {
         if (this->dtype_ == fisea::Dtype::FLOAT)

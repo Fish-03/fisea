@@ -1,7 +1,8 @@
-#include "type.h"
 #include <stdexcept>
 #include <string>
 #include <iostream>
+
+#include "type.h"
 
 fisea::Dtype fisea::dtype_from_string(const string &dtype_str)
 {

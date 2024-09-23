@@ -1,10 +1,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
+#include "functional/fnbind.h"
+#include "tensor/tebind.h"
 namespace py = pybind11;
 
-extern void init_functional(py::module_ &m);
-extern void init_tensor(py::module_ &m);
+// extern void init_functional(py::module_ &m);
+// extern void init_tensor(py::module_ &m);
 // extern int add(int i, int j);
 
 PYBIND11_MODULE(_C, m) {

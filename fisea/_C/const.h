@@ -5,6 +5,4 @@
 #endif
 
 namespace fisea {
-    std::random_device rd;
-    int random_seed = rd();
 }

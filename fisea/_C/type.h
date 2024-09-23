@@ -4,8 +4,6 @@
 #include <vector>
 #include <tuple>
 #include <stdexcept>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 
 using std::string;
 

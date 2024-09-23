@@ -55,6 +55,7 @@ namespace fisea
         static Tensor randn(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float");
 
         
+        
 
         //TODO 在日後的 autograd 中, 可能需要新增其他函數修改 data_, grad_ 的指向.
 
@@ -66,7 +67,7 @@ namespace fisea
         fisea::Device device_;
         fisea::Dtype dtype_ = fisea::Dtype::FLOAT;
         size_t data_size_;
-        std::shared_ptr<void*> data_;
+        std::shared_ptr<void> data_;
         Tensor *grad_ = nullptr;
     };
 
