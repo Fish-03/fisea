@@ -18,21 +18,29 @@ namespace fisea
     {
         if (data != nullptr)
         {
-
-            if (device_ == fisea::Device::CPU)
+            switch (device_)
             {
-                // 用char (1字節) 來進行多態，然後通過 fisea::Dtype 來決定每個元素的解析方式
-                data_ = std::shared_ptr<void>(new char[data_size_], std::default_delete<char[]>());
-                memcpy(data_.get(), data, data_size_);
+            case fisea::Device::CPU:
+                this->_write_cpu(data); // 用char (1字節) 來進行多態，然後通過 fisea::Dtype 來決定每個元素的解析方式
+            case fisea::Device::CUDA:
+#ifdef __CUDACC__
+                this->_write_cpu_cuda(data);
+                break;
+#endif
+                throw std::runtime_error("CUDA is not enabled.");
+            default:
+                throw std::runtime_error("Unknown device type.");
             }
-            else if (device_ == fisea::Device::CUDA)
-            {
-                CHECK_CUDA_ENABLED();
-                data_ = std::shared_ptr<void>(cuda::cuMalloc<char>(data_size_), cuda::cuDeleter<char>());
-                cudaMemcpy(data_.get(), data, data_size_, cudaMemcpyHostToDevice);
-            }
-            // else Error
         }
+    }
+
+    void Tensor::_write_cpu(void *data)
+    {
+        if (data_ == nullptr)
+        {
+            data_ = std::shared_ptr<void>(new char[data_size_], std::default_delete<char[]>());
+        }
+        memcpy(data_.get(), data, data_size_);
     }
 
     Tensor::Tensor(fisea::Shape shape, void *data, std::string device, fisea::Dtype dtype)
@@ -64,10 +72,12 @@ namespace fisea
         }
         else if (this->device_ == fisea::Device::CUDA)
         {
-            CHECK_CUDA_ENABLED();
+#ifdef __CUDACC__
             Tensor out = Tensor(this->shape_, nullptr, fisea::Device::CPU, this->dtype_);
-            cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToHost);
+            out._write_cuda_cpu(this->data_.get());
             return out;
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
         }
         else
         {
@@ -77,110 +87,107 @@ namespace fisea
 
     Tensor Tensor::cuda()
     {
-        if (this->device_ == fisea::Device::CUDA)
+        switch (this->device_)
         {
+        case fisea::Device::CUDA:
             return *this;
-        }
-        else if (this->device_ == fisea::Device::CPU)
-        {
+        case fisea::Device::CPU:
             CHECK_CUDA_ENABLED();
+#ifdef __CUDACC__
             Tensor out = Tensor(this->shape_, nullptr, fisea::Device::CUDA, this->dtype_);
-            cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyHostToDevice);
+            out._write_cpu_cuda(this->data_.get());
             return out;
-        }
-        else
-        {
+#endif
+        default:
             throw std::runtime_error("Unknown device type.");
         }
     }
 
-    //TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
-    Tensor Tensor::to_int()
+
+    void Tensor::to_int_()
     {
-        if (this->dtype_ == fisea::Dtype::INT)
+        switch (this->device_)
         {
-            return *this;
-        }
-        else if (this->dtype_ == fisea::Dtype::FLOAT)
-        {
-            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::INT);
-            if (this->device_ == fisea::Device::CPU)
-            // TODO: 這種做法效率應該很低?
-            {
-                for (size_t i = 0; i < this->shape_.size(); i++)
-                {
-                    ((int *)out.data_.get())[i] = (int)((float *)this->data_.get())[i];
-                }
-                return out;
-            }
-            else if (this->device_ == fisea::Device::CUDA)
-            {
-                cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
-                return out;
-            }
-            else
-            {
-                throw std::runtime_error("Unknown device type.");
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        case fisea::Device::CPU:
+            this->_to_int_cpu_();
+            return;
+        case fisea::Device::CUDA:
+#ifdef __CUDACC__
+            this->_to_int_cuda_();
+            return;
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        default:
+            throw std::runtime_error("Unknown device type.");
         }
     }
 
-    //TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
+    void Tensor::to_float_()
+    {
+        switch (this->device_)
+        {
+        case fisea::Device::CPU:
+            this->_to_float_cpu_();
+            return;
+        case fisea::Device::CUDA:
+#ifdef __CUDACC__
+            this->_to_float_cuda_();
+            return;
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        default:
+            throw std::runtime_error("Unknown device type.");
+        }
+    }
+
+    // TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
+    Tensor Tensor::to_int()
+    {
+        switch (this->device_)
+        {
+        case fisea::Device::CPU:
+            return this->_to_int_cpu();
+        case fisea::Device::CUDA:
+#ifdef __CUDACC__
+            return this->_to_int_cuda();
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        default:
+            throw std::runtime_error("Unknown device type.");
+        }
+    }
+    // TODO: 這個不好實現，如果是 gpu -> gpu 的話，應寫一個 kernel 來實現
     Tensor Tensor::to_float()
     {
-        if (this->dtype_ == fisea::Dtype::FLOAT)
+        switch (this->device_)
         {
-            return *this;
-        }
-        else if (this->dtype_ == fisea::Dtype::INT)
-        {
-            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::FLOAT);
-            if (this->device_ == fisea::Device::CPU)
-            // TODO: 這種做法效率應該很低?
-            {
-                for (size_t i = 0; i < this->shape_.size(); i++)
-                {
-                    ((float *)out.data_.get())[i] = (float)((int *)this->data_.get())[i];
-                }
-                return out;
-            }
-            else if (this->device_ == fisea::Device::CUDA)
-            {
-                cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
-                return out;
-            }
-            else
-            {
-                throw std::runtime_error("Unknown device type.");
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        case fisea::Device::CPU:
+            return this->_to_float_cpu();
+        case fisea::Device::CUDA:
+#ifdef __CUDACC__
+            return this->_to_float_cuda();
+#endif
+        default:
+            throw std::runtime_error("Unknown device type.");
         }
     }
 
     Tensor Tensor::copy()
     {
-        if (this->device_ == fisea::Device::CPU)
+        Tensor out = Tensor(this->shape_, nullptr, this->device_, this->dtype_);
+        switch (this->device_)
         {
-            Tensor out = Tensor(this->shape_, nullptr, this->device_, this->dtype_);
-            memcpy(out.data_.get(), this->data_.get(), this->data_size_);
+        case fisea::Device::CPU:
+            out._write_cpu(this->data_.get());
             return out;
-        }
-        else if (this->device_ == fisea::Device::CUDA)
-        {
-            CHECK_CUDA_ENABLED();
-            Tensor out = Tensor(this->shape_, nullptr, this->device_, this->dtype_);
-            cudaMemcpy(out.data_.get(), this->data_.get(), this->data_size_, cudaMemcpyDeviceToDevice);
+
+        case fisea::Device::CUDA:
+#ifdef __CUDACC__
+            out._write_cuda_cuda(this->data_.get());
             return out;
-        }
-        else
-        {
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        default:
             throw std::runtime_error("Unknown device type.");
         }
     }
@@ -191,61 +198,181 @@ namespace fisea
         return out;
     }
 
-    void Tensor::fill_(float value)
+    Tensor Tensor::_to_int_cpu()
     {
-        // TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
-        if (this->device_ == fisea::Device::CPU)
+        switch (this->dtype_)
         {
-            switch (this->dtype_)
+        case fisea::Dtype::INT:
+            return this->copy();
+        case fisea::Dtype::FLOAT:
+        {
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::INT);
+            int *ptr = (int *)out.data_.get();
+            float *this_ptr = (float *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
             {
-            case fisea::Dtype::INT:
-                memset(this->data_.get(), static_cast<int>(value), this->data_size_);
-            case fisea::Dtype::FLOAT:
-                memset(this->data_.get(), value, this->data_size_);
-            default:
-                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+                ptr[i] = static_cast<int>(this_ptr[i]);
             }
+            return out;
         }
-        else if (this->device_ == fisea::Device::CUDA)
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        }
+    }
+
+    Tensor Tensor::_to_float_cpu()
+    {
+        switch (this->dtype_)
         {
-            switch (this->dtype_)
+        case fisea::Dtype::INT:
+        {
+            Tensor out = Tensor(this->shape_, nullptr, this->device_, fisea::Dtype::FLOAT);
+            float *ptr = (float *)out.data_.get();
+            int *this_ptr = (int *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
             {
-            case fisea::Dtype::INT:
-                cudaMemset(this->data_.get(), static_cast<int>(value), this->data_size_);
-            case fisea::Dtype::FLOAT:
-                cudaMemset(this->data_.get(), value, this->data_size_);
-            default:
-                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+                ptr[i] = static_cast<float>(this_ptr[i]);
             }
+            return out;
+        }
+        case fisea::Dtype::FLOAT:
+            return this->copy();
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        }
+    }
+
+    void Tensor::_to_int_cpu_()
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+            return;
+        case fisea::Dtype::FLOAT: // 這種方法不能推廣到double, 會有內存對齊問題. 
+        {
+            int *ptr = (int *)this->data_.get();
+            float *this_ptr = (float *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
+            {
+                ptr[i] = static_cast<int>(this_ptr[i]);
+            }
+            this->dtype_ = fisea::Dtype::INT;
+            return;
+        }
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        }
+    }
+
+    void Tensor::_to_float_cpu_()
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+        {
+            float *ptr = (float *)this->data_.get();
+            int *this_ptr = (int *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
+            {
+                ptr[i] = static_cast<float>(this_ptr[i]);
+            }
+            this->dtype_ = fisea::Dtype::FLOAT;
+            return;
+        }
+        case fisea::Dtype::FLOAT:
+            return;
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
         }
     }
 
     void Tensor::fill_(int value)
     {
         // TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
-        if (this->device_ == fisea::Device::CPU)
+        switch (this->device_)
         {
-            switch (this->dtype_)
-            {
-            case fisea::Dtype::INT:
-                memset(this->data_.get(), value, this->data_size_);
-            case fisea::Dtype::FLOAT:
-                memset(this->data_.get(), static_cast<float>(value), this->data_size_);
-            default:
-                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
-            }
+        case fisea::Device::CPU:
+        {
+            return this->_fill_cpu(value);
         }
-        else if (this->device_ == fisea::Device::CUDA)
+        case fisea::Device::CUDA:
         {
-            switch (this->dtype_)
+#ifdef __CUDACC__
+            return this->_fill_cuda(value);
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        }
+        default:
+            throw std::runtime_error("Unknown device type.");
+        }
+    }
+
+    void Tensor::fill_(float value)
+    {
+        switch (this->device_)
+        {
+        case fisea::Device::CPU:
+        {
+            return this->_fill_cpu(value);
+        }
+        case fisea::Device::CUDA:
+        {
+#ifdef __CUDACC__
+            return this->_fill_cuda(value);
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        }
+        default:
+            throw std::runtime_error("Unknown device type.");
+        }
+        // TODO 如果 value 和 Tensor 的 dtype 不匹配，應該先進行類型轉換
+    }
+
+    void Tensor::_fill_cpu(float value)
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+            int value = static_cast<int>(value);
+            int *ptr = (int *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
             {
-            case fisea::Dtype::INT:
-                cudaMemset(this->data_.get(), value, this->data_size_);
-            case fisea::Dtype::FLOAT:
-                cudaMemset(this->data_.get(), static_cast<float>(value), this->data_size_);
-            default:
-                throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+                ptr[i] = value;
             }
+            break;
+        case fisea::Dtype::FLOAT:
+            float *ptr = (float *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
+            {
+                ptr[i] = value;
+            }
+            break;
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
+        }
+    }
+
+    void Tensor::_fill_cpu(int value)
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+            int *ptr = (int *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
+            {
+                ptr[i] = value;
+            }
+            break;
+        case fisea::Dtype::FLOAT:
+            float value = static_cast<float>(value);
+            float *ptr = (float *)this->data_.get();
+            for (size_t i = 0; i < this->shape_.size(); i++)
+            {
+                ptr[i] = value;
+            }
+            break;
+        default:
+            throw std::runtime_error("Not implemented type: " + fisea::dtype_to_string(this->dtype_));
         }
     }
 
@@ -262,12 +389,40 @@ namespace fisea
     // TODO 種子設定
     void Tensor::randn_()
     {
+        switch (this->device_)
+        {
+        case fisea::Device::CPU:
+        {
+            return this->_randn_cpu();
+        }
+        case fisea::Device::CUDA:
+        {
+#ifdef __CUDACC__
+            return this->_randn_cuda();
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
+        }
+        default:
+            throw std::runtime_error("Unknown device type.");
+        }
+    }
+
+    void Tensor::_randn_cpu()
+    {
+        if (this->dtype_ != fisea::Dtype::FLOAT)
+        {
+            throw std::runtime_error("Function `randn` Not Support for type: " + fisea::dtype_to_string(this->dtype_));
+        }
+
         std::random_device rd;
         std::mt19937 generator(rd());
         std::normal_distribution<float> distribution(0, 1);
+
+        float *ptr = (float *)this->data_.get();
+
         for (size_t i = 0; i < this->shape_.size(); i++)
         {
-            ((float *)this->data_.get())[i] = distribution(generator);
+            ptr[i] = distribution(generator);
         }
     }
 
@@ -342,26 +497,7 @@ namespace fisea
     Tensor Tensor::randn(fisea::Shape shape, fisea::Device device, fisea::Dtype dtype)
     {
         Tensor out = Tensor(shape, nullptr, device, dtype);
-        // TODO 這個實現是有問題的
-        if (out.device_ == fisea::Device::CPU)
-        {
-            for (size_t i = 0; i < out.shape_.size(); i++)
-            {
-                ((float *)out.data_.get())[i] = (float)rand() / RAND_MAX;
-            }
-        }
-        else if (device == fisea::Device::CUDA)
-        {
-            CHECK_CUDA_ENABLED();
-            for (size_t i = 0; i < out.shape_.size(); i++)
-            {
-                ((float *)out.data_.get())[i] = (float)rand() / RAND_MAX;
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Unknown device type.");
-        }
+        out.randn_();
         return out;
     }
 
