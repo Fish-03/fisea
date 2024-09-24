@@ -12,14 +12,16 @@ namespace fisea
     {
     public:
         // 普通的建構需要將 data_ 複製一份, 這樣可以避免 data_ 的生命週期問題
-        Tensor(fisea::Shape shape, void *data = nullptr, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT);
-        Tensor(fisea::Shape shape, void *data = nullptr, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT);
-        Tensor(fisea::Shape shape, void *data = nullptr, fisea::Device device = fisea::Device::CPU, std::string dtype = "float");
-        Tensor(fisea::Shape shape, void *data = nullptr, std::string device = "cpu",                std::string dtype = "float");
+        Tensor(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT, void *data = nullptr);
+        Tensor(fisea::Shape shape, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT, void *data = nullptr);
+        Tensor(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float",              void *data = nullptr);
+        Tensor(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float",              void *data = nullptr);
+
         ~Tensor(); // 不用釋放 data_ 
 
         // void from(void *other); //TODO 利用這個函數可以不複制地建構 data_ 但是要注意 data_ 的生命週期, 比如from numpy array, 這個可以不用實現先
         static Tensor from(Tensor other);
+        // static Tensor from(const py::array &array);
         
         Tensor copy();
         Tensor cpu();

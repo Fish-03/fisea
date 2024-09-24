@@ -3,8 +3,9 @@
 #include <pybind11/pybind11.h>
 
 #include "testfn.h"
-#include "../const.h"
 #include "testfn.cuh"
+
+#include "../const.h"
 
 namespace py = pybind11;
 

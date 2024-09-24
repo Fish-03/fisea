@@ -1,1 +1,1 @@
-from ._C import functional, tensor
+from ._C import functional, tensor, Device, Dtype
