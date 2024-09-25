@@ -1,8 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "functional/fnbind.h"
-#include "tensor/tebind.h"
+#include "functional/bindings.h"
+#include "tensor/bindings.h"
 #include "type.h"
 
 namespace py = pybind11;

@@ -5,9 +5,8 @@
 #include <random>
 
 #include "../type.h"
-#include "../handler.h"
 #include "../const.h"
-#include "../memory.cuh"
+#include "../functional/kernel.cuh"
 
 #include "Tensor.h"
 
@@ -23,7 +22,7 @@ namespace fisea
             case fisea::Device::CPU:
                 this->_write_cpu(data); // 用char (1字節) 來進行多態，然後通過 fisea::Dtype 來決定每個元素的解析方式
             case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
                 this->_write_cpu_cuda(data);
                 break;
 #endif
@@ -32,6 +31,9 @@ namespace fisea
                 throw std::runtime_error("Unknown device type.");
             }
         }
+#ifdef _DEBUG
+        std::cout << "[DEBUG] Tensor has been created" << std::endl;
+#endif
     }
 
     void Tensor::_write_cpu(void *data)
@@ -61,6 +63,9 @@ namespace fisea
     // 析构函数，注意 data_ 不需要释放，因为 std::shared_ptr 会自动处理
     Tensor::~Tensor()
     {
+#ifdef _DEBUG
+        std::cout << "[DEBUG] Tensor has been deleted" << std::endl;
+#endif
         // 自动管理资源，无需手动释放?
     }
 
@@ -72,8 +77,8 @@ namespace fisea
         }
         else if (this->device_ == fisea::Device::CUDA)
         {
-#ifdef __CUDACC__
-            Tensor out = Tensor(this->shape_, nullptr, fisea::Device::CPU, this->dtype_);
+#ifdef USE_CUDA
+            Tensor out = Tensor(this->shape_, fisea::Device::CPU, this->dtype_, nullptr);
             out._write_cuda_cpu(this->data_.get());
             return out;
 #endif
@@ -92,12 +97,14 @@ namespace fisea
         case fisea::Device::CUDA:
             return *this;
         case fisea::Device::CPU:
-#ifdef __CUDACC__
+        {
+#ifdef USE_CUDA
             Tensor out = Tensor(this->shape_, fisea::Device::CUDA, this->dtype_, nullptr);
             out._write_cpu_cuda(this->data_.get());
             return out;
 #endif
             throw std::runtime_error("CUDA is not enabled.");
+        }
         default:
             throw std::runtime_error("Unknown device type.");
         }
@@ -111,7 +118,7 @@ namespace fisea
             this->_to_int_cpu_();
             return;
         case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             this->_to_int_cuda_();
             return;
 #endif
@@ -129,7 +136,7 @@ namespace fisea
             this->_to_float_cpu_();
             return;
         case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             this->_to_float_cuda_();
             return;
 #endif
@@ -147,7 +154,7 @@ namespace fisea
         case fisea::Device::CPU:
             return this->_to_int_cpu();
         case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             return this->_to_int_cuda();
 #endif
             throw std::runtime_error("CUDA is not enabled.");
@@ -163,7 +170,7 @@ namespace fisea
         case fisea::Device::CPU:
             return this->_to_float_cpu();
         case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             return this->_to_float_cuda();
 #endif
         default:
@@ -181,7 +188,7 @@ namespace fisea
             return out;
 
         case fisea::Device::CUDA:
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             out._write_cuda_cuda(this->data_.get());
             return out;
 #endif
@@ -196,56 +203,56 @@ namespace fisea
         Tensor out = Tensor(other.shape_, other.device_, other.dtype_, other.data_.get());
         return out;
     }
-    //TODO: how to access the data pointer of a py::array? 
-    // Tensor Tensor::from(const py::array &array)
+    // TODO: how to access the data pointer of a py::array?
+    //  Tensor Tensor::from(const py::array &array)
+    //  {
+    //  py::dtype dtype = array.dtype();
+
+    // // 用來存儲數據的指針
+    // void *data = const_cast<void *>(array.data());
+    // fisea::Dtype tensor_dtype;
+
+    // // 檢查是否是 float 或 int 類型，否則轉換為 float
+    // if (dtype.is(py::dtype::of<float>()))
     // {
-        // py::dtype dtype = array.dtype();
+    //     tensor_dtype = fisea::Dtype::FLOAT; // 直接支持 float32
+    // }
+    // else if (dtype.is(py::dtype::of<double>()))
+    // {
+    //     // 將 double 轉換為 float
+    //     py::array_t<float> float_array = array.cast<py::array_t<float>>();
+    //     float* float_data = float_array.mutable_data();
+    //     data = static_cast<void *>(float_data);
+    //     tensor_dtype = fisea::Dtype::FLOAT;
+    // }
+    // else if (dtype.is(py::dtype::of<int32_t>()))
+    // {
+    //     tensor_dtype = fisea::Dtype::INT; // 直接支持 int32
+    // }
+    // else if (dtype.is(py::dtype::of<int64_t>()) || dtype.is(py::dtype::of<long>()))
+    // {
+    //     // 將 int64 轉換為 int32
+    //     py::array_t<int32_t> int_array = array.cast<py::array_t<int32_t>>();
+    //     int* int_data = int_array.mutable_data();
+    //     data = static_cast<void *>(int_data);
+    //     tensor_dtype = fisea::Dtype::INT;
+    // }
+    // else
+    // {
+    //     throw std::runtime_error("Unsupported dtype");
+    // }
 
-        // // 用來存儲數據的指針
-        // void *data = const_cast<void *>(array.data());
-        // fisea::Dtype tensor_dtype;
+    // // 將 NumPy 的形狀轉換為 Tensor 的形狀
+    // std::vector<size_t> shape;
+    // for (py::ssize_t i = 0; i < array.ndim(); ++i)
+    // {
+    //     shape.push_back(array.shape(i));
+    // }
 
-        // // 檢查是否是 float 或 int 類型，否則轉換為 float
-        // if (dtype.is(py::dtype::of<float>()))
-        // {
-        //     tensor_dtype = fisea::Dtype::FLOAT; // 直接支持 float32
-        // }
-        // else if (dtype.is(py::dtype::of<double>()))
-        // {
-        //     // 將 double 轉換為 float
-        //     py::array_t<float> float_array = array.cast<py::array_t<float>>();
-        //     float* float_data = float_array.mutable_data();
-        //     data = static_cast<void *>(float_data);
-        //     tensor_dtype = fisea::Dtype::FLOAT;
-        // }
-        // else if (dtype.is(py::dtype::of<int32_t>()))
-        // {
-        //     tensor_dtype = fisea::Dtype::INT; // 直接支持 int32
-        // }
-        // else if (dtype.is(py::dtype::of<int64_t>()) || dtype.is(py::dtype::of<long>()))
-        // {
-        //     // 將 int64 轉換為 int32
-        //     py::array_t<int32_t> int_array = array.cast<py::array_t<int32_t>>();
-        //     int* int_data = int_array.mutable_data();
-        //     data = static_cast<void *>(int_data);
-        //     tensor_dtype = fisea::Dtype::INT;
-        // }
-        // else
-        // {
-        //     throw std::runtime_error("Unsupported dtype");
-        // }
+    // std::vector<int> int_shape(shape.begin(), shape.end());
+    // fisea::Shape tensor_shape(int_shape);
 
-        // // 將 NumPy 的形狀轉換為 Tensor 的形狀
-        // std::vector<size_t> shape;
-        // for (py::ssize_t i = 0; i < array.ndim(); ++i)
-        // {
-        //     shape.push_back(array.shape(i));
-        // }
-
-        // std::vector<int> int_shape(shape.begin(), shape.end());
-        // fisea::Shape tensor_shape(int_shape);
-
-        // return Tensor(tensor_shape, fisea::Device::CPU, fisea::dtype_from_string(array.dtype().str()), data);
+    // return Tensor(tensor_shape, fisea::Device::CPU, fisea::dtype_from_string(array.dtype().str()), data);
     // }
 
     Tensor Tensor::_to_int_cpu()
@@ -347,7 +354,7 @@ namespace fisea
         }
         case fisea::Device::CUDA:
         {
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             return this->_fill_cuda(value);
 #endif
             throw std::runtime_error("CUDA is not enabled.");
@@ -367,7 +374,7 @@ namespace fisea
         }
         case fisea::Device::CUDA:
         {
-#ifdef __CUDACC__
+#ifdef USE_CUDA
             return this->_fill_cuda(value);
 #endif
             throw std::runtime_error("CUDA is not enabled.");
@@ -384,11 +391,11 @@ namespace fisea
         {
         case fisea::Dtype::INT:
         {
-            int value = static_cast<int>(value);
+            int v = static_cast<int>(value);
             int *ptr = (int *)this->data_.get();
             for (size_t i = 0; i < this->shape_.size(); i++)
             {
-                ptr[i] = value;
+                ptr[i] = v;
             }
             break;
         }
@@ -423,11 +430,11 @@ namespace fisea
         }
         case fisea::Dtype::FLOAT:
         {
-            float value = static_cast<float>(value);
+            float v = static_cast<float>(value);
             float *ptr = (float *)this->data_.get();
             for (size_t i = 0; i < this->shape_.size(); i++)
             {
-                ptr[i] = value;
+                ptr[i] = v;
             }
             break;
         }
@@ -457,10 +464,10 @@ namespace fisea
         }
         case fisea::Device::CUDA:
         {
-#ifdef __CUDACC__
-            return this->_randn_cuda();
-#endif
-            throw std::runtime_error("CUDA is not enabled.");
+// #ifdef USE_CUDA
+//             return this->_randn_cuda();
+// #endif
+            throw std::runtime_error("NOT IMPLEMENTED");
         }
         default:
             throw std::runtime_error("Unknown device type.");
@@ -492,17 +499,20 @@ namespace fisea
         if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 0, out.data_size_);
+            return out;
         }
         else if (device == fisea::Device::CUDA)
         {
-            CHECK_CUDA_ENABLED();
+#ifdef USE_CUDA
             cudaMemset(out.data_.get(), 0, out.data_size_);
+            return out;
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
         }
         else
         {
             throw std::runtime_error("Unknown device type.");
         }
-        return out;
     }
 
     Tensor Tensor::zeros(fisea::Shape shape, fisea::Device device, std::string dtype)
@@ -526,17 +536,20 @@ namespace fisea
         if (out.device_ == fisea::Device::CPU)
         {
             memset(out.data_.get(), 1, out.data_size_);
+            return out;
         }
         else if (device == fisea::Device::CUDA)
         {
-            CHECK_CUDA_ENABLED();
+#ifdef USE_CUDA
             cudaMemset(out.data_.get(), 1, out.data_size_);
+            return out;
+#endif
+            throw std::runtime_error("CUDA is not enabled.");
         }
         else
         {
             throw std::runtime_error("Unknown device type.");
         }
-        return out;
     }
 
     Tensor Tensor::ones(fisea::Shape shape, fisea::Device device, std::string dtype)

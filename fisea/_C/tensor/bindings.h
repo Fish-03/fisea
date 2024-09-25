@@ -7,7 +7,7 @@
 #include "../type.h"
 #include "Tensor.h"           // 引入 Tensor 類的定義
 
-// namespace py = pybind11;
+namespace py = pybind11;
 
 inline void init_tensor(py::module_ &m) {
     py::class_<fisea::Tensor>(m, "Tensor")

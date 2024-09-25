@@ -3,6 +3,7 @@
 #include "../handler.cuh"
 #include "../functional/kernel.cuh"
 
+#ifdef USE_CUDA
 namespace fisea
 {
     void Tensor::_write_cpu_cuda(void *data)
@@ -48,7 +49,7 @@ namespace fisea
             size_t size = this->data_size_ / sizeof(float);
             Tensor out = Tensor(this->shape_, this->device_, fisea::Dtype::INT, nullptr);
 
-            fisea::cudaInt<float*>(static_cast<float *>(this->data_.get()), size, static_cast<int *>(out.data_.get()));
+            fisea::cudaInt<float>(static_cast<float *>(this->data_.get()), size, static_cast<int *>(out.data_.get()));
 
             return out;
         }
@@ -65,7 +66,7 @@ namespace fisea
         {
             size_t size = this->data_size_ / sizeof(int);
             Tensor out = Tensor(this->shape_, this->device_, fisea::Dtype::FLOAT, nullptr);
-            fisea::cudaFloat<int*>(static_cast<int *>(this->data_.get()), size, static_cast<float *>(out.data_.get()));
+            fisea::cudaFloat<int>(static_cast<int *>(this->data_.get()), size, static_cast<float *>(out.data_.get()));
             return out;
         }
         case fisea::Dtype::FLOAT:
@@ -86,7 +87,7 @@ namespace fisea
         case fisea::Dtype::FLOAT:
         {
             size_t size = this->data_size_ / sizeof(float);
-            fisea::cudaInt_<float*>(static_cast<float *>(this->data_.get()), size);
+            fisea::cudaInt_<float>(static_cast<float *>(this->data_.get()), size);
             this->dtype_ = fisea::Dtype::INT;
             return;
         }
@@ -102,7 +103,7 @@ namespace fisea
         case fisea::Dtype::INT:
         {
             size_t size = this->data_size_ / sizeof(int);
-            fisea::cudaFloat_<int*>(static_cast<int *>(this->data_.get()), size);
+            fisea::cudaFloat_<int>(static_cast<int *>(this->data_.get()), size);
             this->dtype_ = fisea::Dtype::FLOAT;
             return;
         }
@@ -113,4 +114,44 @@ namespace fisea
         }
     }
 
+    void Tensor::_fill_cuda(float value)
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+        {
+            fisea::cudaFill<int>(static_cast<int *>(this->data_.get()), this->data_size_ / sizeof(int), static_cast<int>(value));
+            break;
+        }
+        case fisea::Dtype::FLOAT:
+        {
+            fisea::cudaFill<float>(static_cast<float *>(this->data_.get()), this->data_size_ / sizeof(float), value);
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown dtype");
+        }
+    }
+
+    void Tensor::_fill_cuda(int value)
+    {
+        switch (this->dtype_)
+        {
+        case fisea::Dtype::INT:
+        {
+            fisea::cudaFill<int>(static_cast<int *>(this->data_.get()), this->data_size_ / sizeof(int), value);
+            break;
+        }
+        case fisea::Dtype::FLOAT:
+        {
+            fisea::cudaFill<float>(static_cast<float *>(this->data_.get()), this->data_size_ / sizeof(float), static_cast<float>(value));
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown dtype");
+        }
+    }
+
 }
+
+#endif

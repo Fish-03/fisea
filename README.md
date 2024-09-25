@@ -46,3 +46,10 @@ Tensor Tensor::add(Tensor b) {
 還有很多代碼要寫, 魚魚加油.
 
 正確的結構應該是 `.h`可以對應`.cu` 和`.cpp`, 而`.cuh`只對於`.cu`. 而且`.h`和`.cpp`是不能include `cuh`的, 這也要注意.  但是相返則是可以的.
+
+## Devlopment Log (2024-09-25)
+要讓 .cpp 文件使用 .cuh 作為頭的話 (使用裡面的函數)
+- .cuh 文件不能定義有關kernel的函數，比如 `__global__` 這種。
+- 模板函數需要在.cu文件中先實例化。
+
+現在windows也能編譯出這段代碼了，而且生成了_C_EXE來進行debug，具體可以在main.cpp裡進行。

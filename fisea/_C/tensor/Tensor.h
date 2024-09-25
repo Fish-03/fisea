@@ -5,7 +5,7 @@
 
 #include "../type.h"
 #include "../memory.cuh"
-
+#include "../functional/kernel.cuh"
 namespace fisea
 {
     class Tensor
@@ -13,16 +13,16 @@ namespace fisea
     public:
         // 普通的建構需要將 data_ 複製一份, 這樣可以避免 data_ 的生命週期問題
         Tensor(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT, void *data = nullptr);
-        Tensor(fisea::Shape shape, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT, void *data = nullptr);
-        Tensor(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float",              void *data = nullptr);
-        Tensor(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float",              void *data = nullptr);
+        Tensor(fisea::Shape shape, std::string device = "cpu", fisea::Dtype dtype = fisea::Dtype::FLOAT, void *data = nullptr);
+        Tensor(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float", void *data = nullptr);
+        Tensor(fisea::Shape shape, std::string device = "cpu", std::string dtype = "float", void *data = nullptr);
 
-        ~Tensor(); // 不用釋放 data_ 
+        ~Tensor(); // 不用釋放 data_
 
         // void from(void *other); //TODO 利用這個函數可以不複制地建構 data_ 但是要注意 data_ 的生命週期, 比如from numpy array, 這個可以不用實現先
         static Tensor from(Tensor other);
         // static Tensor from(const py::array &array);
-        
+
         Tensor copy();
         Tensor cpu();
         Tensor cuda();
@@ -38,32 +38,29 @@ namespace fisea
         void zero_();
         void one_();
         void randn_();
-        
+
         void to_int_();
         void to_float_();
 
-        Tensor to_int();     //TODO 這個函數可以建立一個 int 的 Tensor
-        Tensor to_float();   //TODO 這個函數可以建立一個 float 的 Tensor
+        Tensor to_int();   // TODO 這個函數可以建立一個 int 的 Tensor
+        Tensor to_float(); // TODO 這個函數可以建立一個 float 的 Tensor
 
         static Tensor zeros(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT);
-        static Tensor zeros(fisea::Shape shape, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT);
+        static Tensor zeros(fisea::Shape shape, std::string device = "cpu", fisea::Dtype dtype = fisea::Dtype::FLOAT);
         static Tensor zeros(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float");
-        static Tensor zeros(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float");
+        static Tensor zeros(fisea::Shape shape, std::string device = "cpu", std::string dtype = "float");
 
         static Tensor ones(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT);
-        static Tensor ones(fisea::Shape shape, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT);
+        static Tensor ones(fisea::Shape shape, std::string device = "cpu", fisea::Dtype dtype = fisea::Dtype::FLOAT);
         static Tensor ones(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float");
-        static Tensor ones(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float");
+        static Tensor ones(fisea::Shape shape, std::string device = "cpu", std::string dtype = "float");
 
         static Tensor randn(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, fisea::Dtype dtype = fisea::Dtype::FLOAT);
-        static Tensor randn(fisea::Shape shape, std::string device = "cpu",                fisea::Dtype dtype = fisea::Dtype::FLOAT);
+        static Tensor randn(fisea::Shape shape, std::string device = "cpu", fisea::Dtype dtype = fisea::Dtype::FLOAT);
         static Tensor randn(fisea::Shape shape, fisea::Device device = fisea::Device::CPU, std::string dtype = "float");
-        static Tensor randn(fisea::Shape shape, std::string device = "cpu",                std::string dtype = "float");
+        static Tensor randn(fisea::Shape shape, std::string device = "cpu", std::string dtype = "float");
 
-        
-        
-
-        //TODO 在日後的 autograd 中, 可能需要新增其他函數修改 data_, grad_ 的指向.
+        // TODO 在日後的 autograd 中, 可能需要新增其他函數修改 data_, grad_ 的指向.
 
     private:
         // CPU Functions
@@ -79,13 +76,13 @@ namespace fisea
         void _fill_cpu(float value);
 
         void _randn_cpu();
-    
-        // CUDA Functions
-        #ifdef __CUDACC__
+
+// CUDA Functions
+#ifdef USE_CUDA
         void _write_cpu_cuda(void *data);
         void _write_cuda_cuda(void *data);
         void _write_cuda_cpu(void *data);
-        
+
         Tensor _to_int_cuda();
         Tensor _to_float_cuda();
 
@@ -95,9 +92,9 @@ namespace fisea
         void _fill_cuda(int value);
         void _fill_cuda(float value);
 
-        void _randn_cuda();
-        
-        #endif
+        // void _randn_cuda();
+
+#endif
 
     protected:
         fisea::Shape shape_;

@@ -22,67 +22,65 @@ find_package(pybind11 CONFIG REQUIRED)
 
 if(CUDAToolkit_FOUND)
   file(GLOB_RECURSE SOURCES "fisea/_C/*.cpp")
+  list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fisea/_C/main.cpp")
   file(GLOB_RECURSE CUDA_SOURCES "fisea/_C/*.cu")
-  
-  add_library(_CU STATIC ${CUDA_SOURCES})
-  set_target_properties(_CU PROPERTIES POSITION_INDEPENDENT_CODE ON)
-  
+    
+  python_add_library(_C MODULE ${SOURCES} ${CUDA_SOURCES} WITH_SOABI)
 
-  python_add_library(_C MODULE ${SOURCES} WITH_SOABI)
-
-  target_compile_definitions(_C PRIVATE USE_CUDA=1)
+  target_compile_definitions(_C PRIVATE USE_CUDA)
   set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON OUTPUT_NAME "_C")
   target_link_libraries(_C PRIVATE pybind11::headers)
   target_link_libraries(_C PRIVATE CUDA::cudart)
-  target_link_libraries(_C PRIVATE _CU)
-  
 
+  file(GLOB_RECURSE SOURCES "fisea/_C/*.cpp")
+  list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fisea/_C/pybind.cpp")
+
+  add_executable(_C_exe "fisea/_C/main.cpp" ${SOURCES} ${CUDA_SOURCES})
+
+  target_compile_definitions(_C_exe PRIVATE USE_CUDA)
+  target_link_libraries(_C_exe PRIVATE CUDA::cudart)
+
+  # if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  #   target_compile_definitions(_C_exe PRIVATE DEBUG)
+  # endif()
+  
 else()
   file(GLOB_RECURSE SOURCES "fisea/_C/*.cpp")
 
   python_add_library(_C MODULE ${SOURCES} WITH_SOABI)
   set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON OUTPUT_NAME "_C")
   target_link_libraries(_C PRIVATE pybind11::headers)
+
+  add_executable(_C_exe ${SOURCES})
+  target_link_libraries(_C_exe PRIVATE pybind11::headers)
+
+  if(CMAKE_BUILD_TYPE STREQUAL "_DEBUG")
+    target_compile_definitions(_C_exe PRIVATE DEBUG)
+  endif()
+
 endif()
 
 target_compile_definitions(_C PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
 install(TARGETS _C DESTINATION fisea)
 
-# function(add_python_module MODULE_PATH)
-#   string(REPLACE "/" "_" MODULE_NAME ${MODULE_PATH})
-#   file(GLOB SOURCES ${MODULE_PATH}/*.cpp)
+# ====== ADDITION FOR EXECUTABLE GENERATION ======
 
-#   # Only add .cu files if CUDA is found
-#   if (CUDAToolkit_FOUND)
-#     file(GLOB CUDA_SOURCES ${MODULE_PATH}/*.cu)
-#     list(APPEND SOURCES ${CUDA_SOURCES})
-#   endif()
+# Create an executable from main.cpp
+# file(GLOB_RECURSE MAIN_SOURCES "fisea/_C/main.cpp")
 
-#   list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp")
+# if(CUDAToolkit_FOUND)
+#   add_executable(fisea_exe ${MAIN_SOURCES} ${CUDA_SOURCES})
+#   target_link_libraries(fisea_exe PRIVATE CUDA::cudart _CU)
+# else()
+#   add_executable(fisea_exe ${MAIN_SOURCES})
+# endif()
 
-#   if(SOURCES)
-#     add_library(${MODULE_NAME}_LIB ${SOURCES})
-#     set_target_properties(${MODULE_NAME}_LIB PROPERTIES POSITION_INDEPENDENT_CODE ON)
-#     python_add_library(${MODULE_NAME} MODULE "${PROJECT_SOURCE_DIR}/${MODULE_PATH}/_extension.cpp" WITH_SOABI)
-#     set_target_properties(${MODULE_NAME} PROPERTIES 
-#                           LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_PATH} 
-#                           OUTPUT_NAME "_cpp_extension"
-#                           )
-#     target_link_libraries(${MODULE_NAME} PRIVATE pybind11::headers)
+# # Link pybind11 and other necessary libraries if required
+# target_link_libraries(fisea_exe PRIVATE pybind11::headers)
 
-#     # Link CUDA runtime and define CUDA flags if CUDA is found
-#     if(CUDAToolkit_FOUND)
-#       target_link_libraries(${MODULE_NAME} PRIVATE CUDA::cudart)
-#       target_compile_definitions(${MODULE_NAME} PRIVATE USE_CUDA)  # Define flag for CUDA support
-#     endif()
-
-#     target_link_libraries(${MODULE_NAME} PRIVATE ${MODULE_NAME}_LIB)
-#     install(TARGETS ${MODULE_NAME} DESTINATION ${MODULE_PATH})
-#   endif()
-# endfunction()
-
-# # Add the modules
-# add_python_module("fisea")
-# add_python_module("fisea/functional")
-
+# # Define properties for the executable
+# set_target_properties(fisea_exe PROPERTIES
+#     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+#     OUTPUT_NAME "fisea_exe"
+# )
