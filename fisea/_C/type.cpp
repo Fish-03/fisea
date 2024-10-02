@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 
-#include "type.h"
+#include "Type.h"
 
 fisea::Dtype fisea::dtype_from_string(const string &dtype_str)
 {

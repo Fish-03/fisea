@@ -1,3 +1,5 @@
+// 這個主要為了生成.EXE檔案,用於DEBUG
+
 #include <iostream>
 #include <vector>
 #include "functional/kernel.cuh"
