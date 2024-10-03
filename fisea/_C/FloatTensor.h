@@ -25,8 +25,7 @@ namespace fisea {
 
         const std::shared_ptr<float> &get_data() const { return data; }
         void set_data(std::shared_ptr<float> data) { this->data = data; }
-        void print(int maxLength = 999, int precision = 3) const;
-        // void print() const;
+        void print(const char* fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;
 
     };
 
@@ -47,7 +46,7 @@ namespace fisea {
         const std::shared_ptr<float> &get_data() const { return data; }
         void set_data(std::shared_ptr<float> data) { this->data = data; }
 
-        void print(int maxLength = 7, int precision = 3) const;
+        void print(const char* fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;
     };
 }
 

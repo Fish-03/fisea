@@ -1,6 +1,8 @@
 // FloatTensor
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <string>
 #include <iomanip>
 
 #include "type.h"
@@ -63,14 +65,69 @@ std::shared_ptr<CudaFloatTensor> FloatTensor::cuda()
     return CudaFloatTensor::create(this);
 }
 
-void FloatTensor::print(int maxLength, int precision) const
+void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int maxHeight) const
 {
-    std::vector<int> indices = this->get_indices(this->shape, this->stride);
-    int num_elements = indices.size();
+    float *dataPtr = this->data.get();
+    int dims = shape.size();
 
-    std::cout << std::fixed << std::setprecision(precision); // 設置固定精度
+    // 打印左括号
+    std::cout << '[';
 
-    int printed = int(0);
+    if (depth == dims - 1)
+    {
+        char buff[100];
+        snprintf(buff, sizeof(buff), fmt, 0.0);
+        int width = this->shape[depth] * (std::string(buff).size() + 2) + depth * 2;
 
-    this->printRecursive<float>(0, printed, maxLength, indices, this->shape, this->data);
+        if (shape[depth] > 0)
+        {
+
+            for (int i = 0; i < this->shape[depth]; i++)
+            {
+                if (width < maxWidth || i <= 3 || i >= this->shape[depth] - 4)
+                {
+                    snprintf(buff, sizeof(buff), fmt, dataPtr[start + i * stride[depth]]);
+                    std::cout << std::string(buff);
+                    if (i < this->shape[depth] - 1)
+                    {
+                        std::cout << ", ";
+                    }
+                }
+                else
+                {
+                    std::cout << "..., ";
+                }
+            }
+        }
+        std::cout << ']';
+    }
+    else
+    {
+        int height = this->shape[depth];
+        if (shape[depth] > 0)
+        {
+            for (int i = 0; i < this->shape[depth]; i++)
+            {
+                if (height < maxHeight || i <= 3 || i >= this->shape[depth] - 4)
+                {
+                    this->print(fmt, depth + 1, start + i * stride[depth], maxWidth, maxHeight);
+                    if (i < this->shape[depth] - 1)
+                    {
+                        std::cout << "," << std::string(dims - depth - 1, '\n') << std::string(depth + 1, ' ');
+                    }
+                }
+                else
+                {
+                    std::cout << "...," << std::string(dims - depth - 1, '\n') << std::string(depth + 1, ' ');
+                    i = this->shape[depth] - 4;
+                }
+            }
+        }
+        std::cout << ']';
+    }
+
+    if (depth == 0)
+    {
+        std::cout << std::endl;
+    }
 }

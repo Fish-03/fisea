@@ -4,7 +4,7 @@
 #include <memory>
 #include <iostream>
 #include <vector>
-
+#include <iomanip>
 #include "type.h"
 
 namespace fisea
@@ -12,6 +12,7 @@ namespace fisea
     class Tensor
     {
     protected:
+        std::shared_ptr<void> data;
         std::vector<int> shape;
         std::vector<int> stride;
         int numel;
@@ -25,10 +26,7 @@ namespace fisea
         bool is_leaf = false;
 
     public:
-        virtual ~Tensor()
-        {
-            std::cout << "[DEBUG] Tensor has been removed" << std::endl;
-        }
+        virtual ~Tensor() {};
         // static TensorBase *create(const std::vector<int> &shap);
 
         // void print() const {};
@@ -41,42 +39,5 @@ namespace fisea
         void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
 
         static std::vector<int> get_indices(const std::vector<int> &shape, const std::vector<int> &stride);
-
-        template <typename T>
-        static void printRecursive(int depth, int &printed, int maxLength, const std::vector<int> &indices,
-                                   const std::vector<int> &shape, std::shared_ptr<T> dataPtr)
-        {
-            {
-                if (depth == shape.size() - 1)
-                { // 最後一維，打印數據
-                    for (int i = 0; i < shape[depth]; ++i)
-                    {
-                        if (printed >= maxLength)
-                        {
-                            std::cout << "..."; // 超過最大長度時顯示 "..."
-                            return;
-                        }
-                        int flat_index = indices[printed];
-                        std::cout << dataPtr.get()[flat_index] << " ";
-                        printed++;
-                    }
-                    std::cout << std::endl;
-                }
-                else
-                { // 遞歸打印多維結構
-                    for (int i = 0; i < shape[depth]; ++i)
-                    {
-                        if (printed >= maxLength)
-                        {
-                            std::cout << "..."; // 超過最大長度時顯示 "..."
-                            return;
-                        }
-                        std::cout << "[";
-                        Tensor::printRecursive<T>(depth + 1, printed, maxLength, indices, shape, dataPtr);
-                        std::cout << "]" << std::endl;
-                    }
-                }
-            }
-        }
     };
 }

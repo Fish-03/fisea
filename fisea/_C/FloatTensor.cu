@@ -64,7 +64,7 @@ std::shared_ptr<CudaFloatTensor> CudaFloatTensor::cuda() {
     return shared_from_this();
 }
 
-void CudaFloatTensor::print(int maxLength, int precision) const
+void CudaFloatTensor::print(const char* fmt, int depth, int start, int maxWidth, int maxHeight) const
 {
-    this->cpu()->print(maxLength, precision);
+    this->cpu()->print(fmt, depth, start, maxWidth, maxHeight);
 }
