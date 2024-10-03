@@ -24,7 +24,12 @@ int main() {
     std::cout << "==== " << std::endl;
     t->print();
     auto a = t->cpu();
-    
+    t->fill_(1);
+    t->print();
+    t->uniform_();
+    t->print();
+    t->normal_();
+    t->print();
     // t.cuda();
     return 0;
 }

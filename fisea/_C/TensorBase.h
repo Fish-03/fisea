@@ -32,12 +32,13 @@ namespace fisea
         // void print() const {};
 
         const std::vector<int> &get_shape() { return shape; }
+        int ndim() { return shape.size(); }
         const int &get_numel() { return numel; }
         const fisea::Device &get_device() { return device; }
         const fisea::Dtype &get_dtype() { return dtype; }
         const std::vector<int> &get_stride() { return stride; }
         void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
 
-        static std::vector<int> get_indices(const std::vector<int> &shape, const std::vector<int> &stride);
+        std::vector<int> get_indices();
     };
 }

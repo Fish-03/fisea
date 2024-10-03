@@ -7,6 +7,7 @@
 
 #include "type.h"
 #include "FloatTensor.h"
+#include "random.h"
 
 using namespace fisea;
 
@@ -70,6 +71,10 @@ void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int
     float *dataPtr = this->data.get();
     int dims = shape.size();
 
+    if (depth == 0)
+    {
+        std::cout << "tensor(";
+    }
     // 打印左括号
     std::cout << '[';
 
@@ -77,7 +82,7 @@ void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int
     {
         char buff[100];
         snprintf(buff, sizeof(buff), fmt, 0.0);
-        int width = this->shape[depth] * (std::string(buff).size() + 2) + depth * 2;
+        int width = this->shape[depth] * (std::string(buff).size() + 2) + depth * 2 + 8;
 
         if (shape[depth] > 0)
         {
@@ -113,21 +118,42 @@ void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int
                     this->print(fmt, depth + 1, start + i * stride[depth], maxWidth, maxHeight);
                     if (i < this->shape[depth] - 1)
                     {
-                        std::cout << "," << std::string(dims - depth - 1, '\n') << std::string(depth + 1, ' ');
+                        std::cout << "," << std::string(dims - depth - 1, '\n') << std::string(depth + 8, ' ');
                     }
                 }
                 else
                 {
-                    std::cout << "...," << std::string(dims - depth - 1, '\n') << std::string(depth + 1, ' ');
+                    std::cout << "...," << std::string(dims - depth - 1, '\n') << std::string(depth + 8, ' ');
                     i = this->shape[depth] - 4;
                 }
             }
         }
         std::cout << ']';
     }
-
     if (depth == 0)
     {
-        std::cout << std::endl;
+        std::cout << ")" << std::endl;
+    }
+}
+
+void FloatTensor::uniform_(float low, float high)
+{
+    auto indices = this->get_indices();
+    float *dataPtr = this->data.get();
+    
+    for (int i : indices)
+    {
+        dataPtr[i] = fisea::rand(low, high);
+    }
+}
+
+void FloatTensor::normal_(float mean, float std)
+{
+    auto indices = this->get_indices();
+    float *dataPtr = this->data.get();
+    
+    for (int i : indices)
+    {
+        dataPtr[i] = mean + std * fisea::randn();
     }
 }
