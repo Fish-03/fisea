@@ -8,30 +8,38 @@
 #include "type.h"
 
 namespace fisea {
-    class TensorBase {
+    class Tensor {
     private:
-        std::vector<int> shape;
-        std::vector<int> stride;
-        
+
+    protected:
+        std::vector<size_t> shape;
+        std::vector<size_t> stride;
+        size_t numel;
+
         fisea::Device device;
         fisea::Dtype dtype;
 
-        std::shared_ptr<void> data = nullptr;
-
         bool requires_grad = false;
-        TensorBase *grad = nullptr;
+        Tensor *grad = nullptr;
         // grad_fn
         bool is_leaf = false;
-        
 
     public:
-        ~TensorBase() {
+        ~Tensor() {
             std::cout << "[DEBUG] Tensor has been removed" << std::endl;
         }
         // static TensorBase *create(const std::vector<int> &shap);
-        virtual void initialize() = 0;
-        virtual void finalize() = 0;
-        virtual void reshape(int new_shape) = 0;
-        virtual void print() const = 0;
+        virtual std::shared_ptr<Tensor> cpu();
+        virtual std::shared_ptr<Tensor> cuda();
+    
+        virtual void print() const;
+
+        // virtual const std::shared_ptr<void> &get_data() { return data; }
+        const std::vector<size_t> &get_shape() { return shape; }
+        const size_t &get_numel() { return numel; }
+        const fisea::Device &get_device() { return device; }
+        const fisea::Dtype &get_dtype() { return dtype; }
+        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
+
     };
 }
