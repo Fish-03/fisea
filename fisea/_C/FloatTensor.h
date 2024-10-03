@@ -32,7 +32,7 @@ namespace fisea {
             auto indices = this->get_indices();
             auto ptr = this->data.get();
 
-            value = static_cast<T>(value);
+            value = static_cast<float>(value);
             
             for (int i : indices) {
                 ptr[i] = value;
@@ -63,6 +63,15 @@ namespace fisea {
         void set_data(std::shared_ptr<float> data) { this->data = data; }
 
         void print(const char* fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;
+
+        template <typename T>
+        void fill_(T value);
+        
+        void ones_() { fill_(1.0); }
+        void zeros_() { fill_(0.0); }
+        void uniform_();
+        void normal_(float mean = 0.0, float std = 1.0);
+
     };
 }
 

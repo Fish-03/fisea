@@ -4,9 +4,9 @@
 #include <iomanip>
 #include <cuda.h>
 
-
 #include "type.h"
 #include "FloatTensor.h"
+#include "helper.cuh"
 
 using namespace fisea;
 
@@ -40,7 +40,10 @@ CudaFloatTensor::CudaFloatTensor(std::vector<int> shape, std::vector<int> stride
     this->numel = numel;
 
     float *dataPtr;
-    cudaMalloc(&dataPtr, numel * sizeof(float));
+    auto error = cudaMalloc(&dataPtr, numel * sizeof(float));
+    if (error != cudaSuccess) {
+        throw std::runtime_error("cudaMalloc failed");
+    }
     this->data = std::shared_ptr<float>(dataPtr, [](float *ptr) { cudaFree(ptr); });
 }
 
@@ -68,3 +71,22 @@ void CudaFloatTensor::print(const char* fmt, int depth, int start, int maxWidth,
 {
     this->cpu()->print(fmt, depth, start, maxWidth, maxHeight);
 }
+
+void CudaFloatTensor::normal_(float mean, float std) {
+    fisea::cudaNormal(this->get_data().get(), this->numel, mean, std);
+}
+
+void CudaFloatTensor::uniform_() {
+    fisea::cudaUniform(this->get_data().get(), this->numel);
+}
+
+//TODO cudaMemset 只能填充0, 需要手寫一個kernel
+template <typename T>
+void CudaFloatTensor::fill_(T value) {
+    value = static_cast<float>(value);
+    cudaMemset(this->get_data().get(), value, this->numel * sizeof(float));
+}
+
+template void CudaFloatTensor::fill_<int>(int value);
+template void CudaFloatTensor::fill_<float>(float value);
+template void CudaFloatTensor::fill_<double>(double value);

@@ -38,7 +38,7 @@ if(CUDAToolkit_FOUND)
   add_executable(_C_exe "fisea/_C/main.cpp" ${SOURCES} ${CUDA_SOURCES})
 
   target_compile_definitions(_C_exe PRIVATE USE_CUDA)
-  target_link_libraries(_C_exe PRIVATE CUDA::cudart)
+  target_link_libraries(_C_exe PRIVATE CUDA::cudart CUDA::curand)
 
   # if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   #   target_compile_definitions(_C_exe PRIVATE DEBUG)

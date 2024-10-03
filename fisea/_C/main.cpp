@@ -6,7 +6,7 @@
 #include "FloatTensor.h"
 
 int main() {
-    std::vector<int> shape  {20, 3, 4};
+    std::vector<int> shape  {3, 4};
 
     // float data[24];
     // for (int i = 0; i < 24; i++) {
@@ -30,6 +30,16 @@ int main() {
     t->print();
     t->normal_();
     t->print();
-    // t.cuda();
+    std::cout << "==== " << std::endl;
+    auto b = t->cuda();
+    b->zeros_();
+    b->print();
+    b->ones_();
+    b->print();
+    b->uniform_();
+    b->print();
+    b->normal_();
+    b->print();
+
     return 0;
 }
