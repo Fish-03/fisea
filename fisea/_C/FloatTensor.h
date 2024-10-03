@@ -8,25 +8,46 @@
 #include "TensorBase.h"
 
 namespace fisea {
-    class FloatTensor: public Tensor {
-    private:
-        std::shared_ptr<float*> data = nullptr;
-
+    class CudaFloatTensor;
+    
+    class FloatTensor:  public std::enable_shared_from_this<FloatTensor>, public Tensor {
     protected:
-        fisea::Device device = fisea::Device::CPU;
-        fisea::Dtype dtype = fisea::Dtype::FLOAT;
+        std::shared_ptr<float> data ;
+    public:
+        FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        ~FloatTensor(){
+            std::cout << "[DEBUG] FloatTensor is deleted" << std::endl;
+        };
+        static std::shared_ptr<FloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
+
+        std::shared_ptr<FloatTensor> cpu();
+        std::shared_ptr<CudaFloatTensor> cuda();
+
+        const std::shared_ptr<float> &get_data() const { return data; }
+        void set_data(std::shared_ptr<float> data) { this->data = data; }
+        void print(int maxLength = 999, int precision = 3) const;
+        // void print() const;
+
+    };
+
+    class CudaFloatTensor: public Tensor, public std::enable_shared_from_this<CudaFloatTensor> {
+    private:
 
     public:
-        FloatTensor(std::shared_ptr<float*> data = nullptr, std::vector<size_t> shape = {}, std::vector<size_t> stride = {});
+        std::shared_ptr<float> data = nullptr;
 
-        static std::shared_ptr<FloatTensor> create(std::shared_ptr<float*> data = nullptr, std::vector<int> shape = {}, std::vector<int> stride = {});
+        CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        ~CudaFloatTensor(){};
+        static std::shared_ptr<CudaFloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
+        static std::shared_ptr<CudaFloatTensor> create(FloatTensor* tensor);
 
-        std::shared_ptr<Tensor> cpu();
-        std::shared_ptr<Tensor> cuda();
+        std::shared_ptr<FloatTensor> cpu() const;
+        std::shared_ptr<CudaFloatTensor> cuda();
 
-        void print() const;
+        const std::shared_ptr<float> &get_data() const { return data; }
+        void set_data(std::shared_ptr<float> data) { this->data = data; }
 
-
+        void print(int maxLength = 7, int precision = 3) const;
     };
 }
 
