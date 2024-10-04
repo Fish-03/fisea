@@ -68,6 +68,7 @@ std::shared_ptr<CudaFloatTensor> FloatTensor::cuda()
 
 void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int maxHeight) const
 {
+    
     float *dataPtr = this->data.get();
     int dims = shape.size();
 

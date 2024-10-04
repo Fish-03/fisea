@@ -33,12 +33,9 @@ int main() {
     fisea::ReLU relu;
     std::cout << "==== " << std::endl;
     auto b = relu(a);
-    a->print();
-    a->backward();
-    // b->grad->print();
-    a->grad->print();
     b->backward();
-    // t.cuda();
+    a->grad->print();
+
     
     return 0;
 }
