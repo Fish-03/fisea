@@ -4,42 +4,41 @@
 #include <memory>
 #include <iostream>
 #include <vector>
-
+#include <iomanip>
 #include "type.h"
 
-namespace fisea {
-    class Tensor {
-    private:
-
+namespace fisea
+{
+    class Tensor
+    {
     protected:
-        std::vector<size_t> shape;
-        std::vector<size_t> stride;
-        size_t numel;
+        std::shared_ptr<void> data;
+        std::vector<int> shape;
+        std::vector<int> stride;
+        int numel;
 
         fisea::Device device;
         fisea::Dtype dtype;
 
         bool requires_grad = false;
-        Tensor *grad = nullptr;
+        // Tensor *grad;
         // grad_fn
         bool is_leaf = false;
 
     public:
-        ~Tensor() {
-            std::cout << "[DEBUG] Tensor has been removed" << std::endl;
-        }
+        virtual ~Tensor() {};
         // static TensorBase *create(const std::vector<int> &shap);
-        virtual std::shared_ptr<Tensor> cpu();
-        virtual std::shared_ptr<Tensor> cuda();
-    
-        virtual void print() const;
 
-        // virtual const std::shared_ptr<void> &get_data() { return data; }
-        const std::vector<size_t> &get_shape() { return shape; }
-        const size_t &get_numel() { return numel; }
+        // void print() const {};
+
+        const std::vector<int> &get_shape() { return shape; }
+        int ndim() { return shape.size(); }
+        const int &get_numel() { return numel; }
         const fisea::Device &get_device() { return device; }
         const fisea::Dtype &get_dtype() { return dtype; }
+        const std::vector<int> &get_stride() { return stride; }
         void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
 
+        std::vector<int> get_indices();
     };
 }

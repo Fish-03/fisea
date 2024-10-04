@@ -3,7 +3,8 @@
 
 const int kCudaThreadsNum = 512;
 
-inline int CudaGetBlocks(const int N) {
+inline int CudaGetBlocks(const int N)
+{
     return (N + kCudaThreadsNum - 1) / kCudaThreadsNum;
 }
 
@@ -12,6 +13,23 @@ inline int CudaGetBlocks(const int N) {
          i < (n);                                       \
          i += blockDim.x * gridDim.x)
 
-namespace fisea {
-
+namespace fisea
+{
+    inline void __grapIdx(std::vector<int> &indices, int depth, int start, Tensor *t)
+    {
+        if (depth == t->ndim() - 1)
+        {
+            for (int i = 0; i < t->get_shape()[depth]; i++)
+            {
+                indices[start + i] = start + i * t->get_stride()[depth];
+            }
+        }
+        else
+        {
+            for (int i = 0; i < t->get_shape()[depth]; i++)
+            {
+                __grapIdx(indices, depth + 1, start + i * t->get_stride()[depth], t);
+            }
+        }
+    }
 }
