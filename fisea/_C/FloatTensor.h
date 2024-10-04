@@ -3,13 +3,13 @@
 
 #include <memory>
 #include <vector>
-
+#include <functional>
 #include "type.h"
 #include "TensorBase.h"
 
 namespace fisea {
     class CudaFloatTensor;
-    
+    class FunctionBase;
     class FloatTensor:  public std::enable_shared_from_this<FloatTensor>, public Tensor {
     protected:
         std::shared_ptr<float> data ;
@@ -22,7 +22,9 @@ namespace fisea {
 
         std::shared_ptr<FloatTensor> cpu();
         std::shared_ptr<CudaFloatTensor> cuda();
-        
+        std::shared_ptr<FloatTensor> grad=nullptr;
+        std::function<void(std::shared_ptr<FloatTensor>, std::shared_ptr<FloatTensor>)> grad_fn=nullptr;
+        void backward(std::shared_ptr<FloatTensor> grad=nullptr);
         const std::shared_ptr<float> &get_data() const { return data; }
         void set_data(std::shared_ptr<float> data) { this->data = data; }
         void print(const char* fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;

@@ -9,7 +9,6 @@
 
 namespace fisea
 {
-    class FunctionBase;
     class Tensor
     {
     protected:
@@ -41,6 +40,5 @@ namespace fisea
         void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
 
         std::vector<int> get_indices();
-        friend class FunctionBase;
     };
 }

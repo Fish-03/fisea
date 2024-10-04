@@ -20,21 +20,37 @@ std::shared_ptr<FloatTensor> ReLU::forward(std::shared_ptr<FloatTensor> input, s
     {
         outputData[i] = dataPtr[i] > 0 ? dataPtr[i] : 0;
     }
+    input->grad_fn = std::bind(&ReLU::backward, this, std::placeholders::_1, std::placeholders::_2);
     return output;
 }
-std::shared_ptr<FloatTensor> ReLU::backwardcalulate(std::shared_ptr<FloatTensor> grad)
+ 
+void ReLU::backward(std::shared_ptr<FloatTensor> input, std::shared_ptr<FloatTensor> grad)
 {
-    auto data = grad->get_data();
-    auto shape = grad->get_shape();
-    auto stride = grad->get_stride();
-    auto numel = grad->get_numel();
-    auto device = grad->get_device();
-    auto dtype = grad->get_dtype();
+    auto data = input->get_data();
     auto dataPtr = data.get();
-    auto indices = grad->get_indices();
-    for (int i : indices)
+   
+    if (input->grad == nullptr)
     {
-        dataPtr[i] = dataPtr[i] > 0 ? 1 : 0;
+        input->grad = FloatTensor::create(input->get_shape(), input->get_stride());
     }
-    return grad;
+    auto dataGradPtr = input->grad->get_data().get();
+    auto indices = input->get_indices();
+    if (grad == nullptr)
+    {
+        for (int i : indices)
+        {
+            dataGradPtr[i] = dataPtr[i] > 0 ? 1 : 0;
+        }
+    }
+    else
+    {
+        auto gradData = grad->get_data();
+        auto gradDataPtr = gradData.get();
+        for (int i : indices)
+        {
+            dataGradPtr[i] = dataPtr[i] > 0 ? gradDataPtr[i] : 0;
+        }
+    }
+
+
 }
