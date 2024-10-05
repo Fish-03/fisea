@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <stdexcept>
+#include <functional>
 
 using std::string;
 
@@ -39,4 +40,5 @@ namespace fisea
 
     size_t dtype_size(Dtype dtype);
     size_t dtype_size(string dtype);
+
 }

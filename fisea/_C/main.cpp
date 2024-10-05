@@ -34,7 +34,7 @@ int main() {
     std::cout << "==== " << std::endl;
     auto b = relu(a);
     b->backward();
-    a->grad->print();
+    a->get_grad()->print();
 
     
     return 0;

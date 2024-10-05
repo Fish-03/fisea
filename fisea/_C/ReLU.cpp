@@ -30,11 +30,11 @@ void ReLU::backward(std::shared_ptr<FloatTensor> input, std::shared_ptr<FloatTen
     auto data = input->get_data();
     auto dataPtr = data.get();
    
-    if (input->grad_fn_records.front()->grad == nullptr)
+    if (input->grad_fn_records.front()->get_grad() == nullptr)
     {
-        input->grad_fn_records.front()->grad = FloatTensor::create(input->get_shape(), input->get_stride());
+        input->grad_fn_records.front()->set_grad(FloatTensor::create(input->get_shape(), input->get_stride()));
     }
-    auto dataGradPtr = input->grad_fn_records.front()->grad->get_data().get();
+    auto dataGradPtr = input->grad_fn_records.front()->get_grad()->get_data().get();
     auto indices = input->get_indices();
     if (grad == nullptr)
     {
