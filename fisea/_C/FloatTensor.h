@@ -52,7 +52,9 @@ namespace fisea {
         std::shared_ptr<float> data = nullptr;
 
         CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
-        ~CudaFloatTensor(){};
+        ~CudaFloatTensor(){
+            std::cout << "[DEBUG] CudaFloatTensor is deleted" << std::endl;
+        };
         static std::shared_ptr<CudaFloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
         static std::shared_ptr<CudaFloatTensor> create(FloatTensor* tensor);
 
