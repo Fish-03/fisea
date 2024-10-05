@@ -160,9 +160,22 @@ void FloatTensor::normal_(float mean, float std)
 }
 void FloatTensor::backward(std::shared_ptr<FloatTensor> grad)
 {
+    if (grad == nullptr)
+    {
+        if (this->grad == nullptr)
+        {
+            grad = FloatTensor::create(this->shape);
+            grad->ones_();
+        }
+        else
+        {
+            grad = this->grad;
+        }
+    }
+
     if (this->grad_fn != nullptr)
     {
-        this->grad_fn(shared_from_this(), grad);
+        this->grad_fn(grad);
     }
     else{
         // std::cout << "grad_fn is nullptr" << std::endl;

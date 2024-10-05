@@ -1,15 +1,22 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <vector>
 #include <tuple>
+#include <variant>
+#include <map>
 #include <stdexcept>
-#include <functional>
 
 using std::string;
 
 namespace fisea
 {
+    class FloatTensor;
+    class CudaFloatTensor;
+    class IntTensor;
+    class CudaIntTensor;
+
     enum class Device
     {
         CPU,
@@ -23,6 +30,16 @@ namespace fisea
         FLOAT,
         DOUBLE,
     };
+    
+    using FloatTensorPtr = std::shared_ptr<FloatTensor>;
+    using CudaFloatTensorPtr = std::shared_ptr<CudaFloatTensor>;
+    using IntTensorPtr = std::shared_ptr<IntTensor>;
+    using CudaIntTensorPtr = std::shared_ptr<CudaIntTensor>;
+
+    using Tensor = std::variant<FloatTensor, CudaFloatTensor, IntTensor, CudaIntTensor>;
+    using TensorPtr = std::variant<FloatTensorPtr, CudaFloatTensorPtr, IntTensorPtr, CudaIntTensorPtr>;
+    
+    using ctx_t = std::map<std::string, TensorPtr>;
     
     using Shape = std::vector<int>;
 
@@ -40,5 +57,4 @@ namespace fisea
 
     size_t dtype_size(Dtype dtype);
     size_t dtype_size(string dtype);
-
 }

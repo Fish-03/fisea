@@ -11,13 +11,13 @@ namespace fisea
 {
     class CudaFloatTensor;
 
-    class FloatTensor : public std::enable_shared_from_this<FloatTensor>, public Tensor {
+    class FloatTensor : public TensorBase, public std::enable_shared_from_this<FloatTensor> {
     protected:
         std::shared_ptr<float> data;
         std::shared_ptr<FloatTensor> grad;
-        fisea::_gradInfo<FloatTensor> gradinfo;
 
     public:
+        bool requires_grad = true;
         FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
         ~FloatTensor()
         {
@@ -25,11 +25,14 @@ namespace fisea
         };
         static std::shared_ptr<FloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
 
+        std::function<void(std::shared_ptr<FloatTensor>)> grad_fn = nullptr;
+        
+        void backward(std::shared_ptr<FloatTensor> grad = nullptr);
+
         std::shared_ptr<FloatTensor> cpu();
         std::shared_ptr<CudaFloatTensor> cuda();
-        std::function<void(std::shared_ptr<FloatTensor>, std::shared_ptr<FloatTensor>)> grad_fn = nullptr;
-        std::vector<std::shared_ptr<FloatTensor>> grad_fn_records{};
-        void backward(std::shared_ptr<FloatTensor> grad = nullptr);
+
+        
 
         const std::shared_ptr<float> &get_data() const { return data; }
         void set_data(std::shared_ptr<float> data) { this->data = data; }
@@ -58,16 +61,14 @@ namespace fisea
         void normal_(float mean = 0.0, float std = 1.0);
     };
 
-    class CudaFloatTensor : public Tensor, public std::enable_shared_from_this<CudaFloatTensor>
+    class CudaFloatTensor : public TensorBase, public std::enable_shared_from_this<CudaFloatTensor>
     {
     protected:
         std::shared_ptr<float> data;
         std::shared_ptr<CudaFloatTensor> grad;
-        _gradInfo<CudaFloatTensor> gradinfo;
 
     public:
-        
-
+        bool requires_grad = true;
         CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
         ~CudaFloatTensor()
         {
