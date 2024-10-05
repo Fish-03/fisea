@@ -1,49 +1,106 @@
-// Tensor的基類, 定義了非常多虛函數方法.
 
 #pragma once
-#include <memory>
-#include <string>
-#include <functional>
 #include <iostream>
-#include <vector>
-#include <iomanip>
+#include <variant>
+#include <tuple>
 #include <map>
+#include <memory>
+#include <functional>
+#include <typeinfo>
+
+#include <utility>
+#include <cstddef>
 
 #include "type.h"
-
+#include "FloatTensor.h"
 namespace fisea
 {
-    class TensorBase
+    template <typename T>
+    class FnBase
     {
-    protected:
-        std::shared_ptr<void> data;
-        std::vector<int> shape;
-        std::vector<int> stride;
-        int numel;
-
-        Device device;
-        Dtype dtype;
-
-        bool requires_grad = false;
-        const bool is_leaf = false;
-
-        std::shared_ptr<Tensor> grad;
 
     public:
-        virtual ~TensorBase() {};
-        // static TensorBase *create(const std::vector<int> &shap);
+        template <typename U = T, typename... Args>
+        static auto apply(Args... args) -> decltype(U::forward(std::declval<ctx_t &>(), std::forward<Args>(args)...))
+        {
+            ctx_t ctx;
+            auto out = U::forward(ctx, std::forward<Args>(args)...);
 
-        // void print() const {};
+            auto captured_vars = std::make_tuple(std::forward<Args>(args)...);
 
-        const std::vector<int> &get_shape() { return shape; }
-        int ndim() { return shape.size(); }
-        const int &get_numel() { return numel; }
-        const fisea::Device &get_device() { return device; }
-        const fisea::Dtype &get_dtype() { return dtype; }
-        const std::vector<int> &get_stride() { return stride; }
-        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
+            out->grad_fn = [ctx, captured_vars, out](auto grad) mutable
+            {
+                U::backward(ctx, grad);
 
-        std::vector<int> get_indices();
+                // 這裡應該要自動handle 所有變量的backward.
+                // std::apply([](auto... vars)
+                //            { (void(std::initializer_list<int>{
+                //                  (call_backward_if_tensor_ptr(vars), 0)...})); }, captured_vars);
+            };
+            return out;
+        }
     };
 
-}
+    template <typename T>
+    void call_backward_if_tensor_ptr(T var)
+    {
+        if constexpr (std::is_same_v<std::decay_t<T>, FloatTensorPtr> ||
+                      std::is_same_v<std::decay_t<T>, CudaFloatTensorPtr>)
+        {
+            if (var->requires_grad && var->grad_fn != nullptr) // Segmentation fault here
+            {
+                var->backward(var->get_grad());
+            }
+        }
+    }
+
+    class Add : public FnBase<Add>
+    {
+    public:
+        static FloatTensorPtr forward(ctx_t &ctx, FloatTensorPtr x, FloatTensorPtr y)
+        {
+            auto output = std::make_shared<FloatTensor>(x->get_shape());
+            auto outdata = output->get_data().get();
+            auto xdata = x->get_data().get();
+            auto ydata = y->get_data().get();
+
+            for (int i = 0; i < x->get_numel(); i++)
+            {
+                outdata[i] = xdata[i] + ydata[i];
+            }
+
+            ctx["x"] = x;
+            ctx["y"] = y;
+
+            return output;
+        }
+
+        static void backward(ctx_t &ctx, FloatTensorPtr grad)
+        {
+            auto x = std::get<FloatTensorPtr>(ctx["x"]);
+            auto y = std::get<FloatTensorPtr>(ctx["y"]);
+
+            // x->print();
+            // x->fill_(1.0);
+
+            if (grad == nullptr)
+            {
+                grad = fisea::FloatTensor::create(x->get_shape());
+                grad->fill_(1);
+            }
+
+            if (x->requires_grad)
+            {
+                x->set_grad(grad);
+            }
+
+            if (y->requires_grad)
+            {
+                y->set_grad(grad);
+            }
+
+            return;
+        }
+    };
+
+} // namespace fisea
