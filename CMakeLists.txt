@@ -24,6 +24,8 @@ if(CUDAToolkit_FOUND)
   file(GLOB_RECURSE SOURCES "fisea/_C/*.cpp")
   list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fisea/_C/main.cpp")
   file(GLOB_RECURSE CUDA_SOURCES "fisea/_C/*.cu")
+  file(GLOB_RECURSE H SOURCES "fisea/_C/*.h")
+
     
   python_add_library(_C MODULE ${SOURCES} ${CUDA_SOURCES} WITH_SOABI)
 
@@ -46,7 +48,7 @@ if(CUDAToolkit_FOUND)
   
 else()
   file(GLOB_RECURSE SOURCES "fisea/_C/*.cpp")
-
+  file(GLOB_RECURSE H SOURCES "fisea/_C/*.h")
   python_add_library(_C MODULE ${SOURCES} WITH_SOABI)
   set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON OUTPUT_NAME "_C")
   target_link_libraries(_C PRIVATE pybind11::headers)

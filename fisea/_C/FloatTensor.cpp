@@ -68,6 +68,7 @@ std::shared_ptr<CudaFloatTensor> FloatTensor::cuda()
 
 void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int maxHeight) const
 {
+    
     float *dataPtr = this->data.get();
     int dims = shape.size();
 
@@ -155,5 +156,20 @@ void FloatTensor::normal_(float mean, float std)
     for (int i : indices)
     {
         dataPtr[i] = mean + std * fisea::randn();
+    }
+}
+void FloatTensor::backward(std::shared_ptr<FloatTensor> grad)
+{
+    if (this->grad_fn != nullptr)
+    {
+        this->grad_fn(shared_from_this(), grad);
+    }
+    else{
+        // std::cout << "grad_fn is nullptr" << std::endl;
+        try {
+            throw std::invalid_argument("grad_fn is nullptr");
+        } catch (const std::invalid_argument &e) {
+            std::cerr << e.what() << '\n';
+        }
     }
 }

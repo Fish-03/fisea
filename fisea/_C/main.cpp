@@ -4,7 +4,7 @@
 #include <vector>
 #include <typeinfo>
 #include "FloatTensor.h"
-
+#include "ReLU.h"
 int main() {
     std::vector<int> shape  {3, 4};
 
@@ -30,16 +30,12 @@ int main() {
     t->print();
     t->normal_();
     t->print();
+    fisea::ReLU relu;
     std::cout << "==== " << std::endl;
-    auto b = t->cuda();
-    b->zeros_();
-    b->print();
-    b->ones_();
-    b->print();
-    b->uniform_();
-    b->print();
-    b->normal_();
-    b->print();
+    auto b = relu(a);
+    b->backward();
+    a->grad->print();
 
+    
     return 0;
 }
