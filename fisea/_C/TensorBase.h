@@ -24,12 +24,14 @@ namespace fisea
         Device device;
         Dtype dtype;
 
-        bool requires_grad = false;
-        const bool is_leaf = false;
+        
+        
 
         std::shared_ptr<Tensor> grad;
 
     public:
+        bool requires_grad = false;
+        bool is_leaf = true;
         virtual ~TensorBase() {};
         // static TensorBase *create(const std::vector<int> &shap);
 

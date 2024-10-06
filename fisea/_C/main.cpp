@@ -33,15 +33,29 @@ int main() {
     auto x = fisea::FloatTensor::create(shape);
     x->normal_();
     auto y = fisea::FloatTensor::create(shape);
-    y->uniform_();
-    auto b = fisea::relu::apply(x);
+    y->normal_();
+    auto z = fisea::Add::apply(x, y);
+    auto b = fisea::relu::apply(z);
     std::cout << "x: " << std::endl;
     x->print();
-    std::cout << "relu: " << std::endl;
+    std::cout << "y: " << std::endl;
+    y->print();
+    std::cout << "z: " << std::endl;
+    z->print();
+    std::cout << "result: " << std::endl;
     b->print();
+
     b->backward();
+    
+    std::cout << "x" << std::endl;
+    x->print();
     std::cout << "x.grad: " << std::endl;
-    x->get_grad()->print();
+    if (x->get_grad() == nullptr) {
+        std::cout << "grad is null" << std::endl;
+    }
+    else {
+        x->get_grad()->print();
+    }
     
     return 0;
 }

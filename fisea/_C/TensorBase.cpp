@@ -1,6 +1,6 @@
 #include <vector>
 #include "TensorBase.h"
-#include "Helper.h"
+#include "helper.h"
 
 using namespace fisea;
 

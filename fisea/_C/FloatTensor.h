@@ -18,14 +18,14 @@ namespace fisea
 
     public:
         bool requires_grad = true;
-        FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~FloatTensor()
         {
             std::cout << "[DEBUG] FloatTensor is deleted" << std::endl;
         };
-        static std::shared_ptr<FloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
-
-        std::function<void(std::shared_ptr<FloatTensor>)> grad_fn = nullptr;
+        static FloatTensorPtr create(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
+        
+        std::function<void(FloatTensorPtr)> grad_fn = nullptr;
         
         void backward(std::shared_ptr<FloatTensor> grad = nullptr);
 
@@ -42,18 +42,7 @@ namespace fisea
         void print(const char *fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;
 
         template <typename T>
-        void fill_(T value)
-        {
-            auto indices = this->get_indices();
-            auto ptr = this->data.get();
-
-            value = static_cast<float>(value);
-
-            for (int i : indices)
-            {
-                ptr[i] = value;
-            }
-        }
+        void fill_(T value);
 
         void ones_() { fill_(1.0); }
         void zeros_() { fill_(0.0); }
@@ -69,13 +58,13 @@ namespace fisea
 
     public:
         bool requires_grad = true;
-        CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~CudaFloatTensor()
         {
             std::cout << "[DEBUG] CudaFloatTensor is deleted" << std::endl;
         };
-        static std::shared_ptr<CudaFloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
-        static std::shared_ptr<CudaFloatTensor> create(FloatTensor *tensor);
+        static CudaFloatTensorPtr create(FloatTensorPtr t);
+        static CudaFloatTensorPtr create(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
 
         std::shared_ptr<FloatTensor> cpu() const;
         std::shared_ptr<CudaFloatTensor> cuda();

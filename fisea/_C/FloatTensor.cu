@@ -10,7 +10,9 @@
 
 using namespace fisea;
 
-CudaFloatTensor::CudaFloatTensor(std::vector<int> shape, std::vector<int> stride) {
+CudaFloatTensor::CudaFloatTensor(std::vector<int> shape, std::vector<int> stride, bool requires_grad, bool is_leaf) {
+    this->requires_grad = requires_grad;
+    this->is_leaf = is_leaf;
     this->device = Device::CUDA;
     this->dtype = Dtype::FLOAT;
 
@@ -47,11 +49,12 @@ CudaFloatTensor::CudaFloatTensor(std::vector<int> shape, std::vector<int> stride
     this->data = std::shared_ptr<float>(dataPtr, [](float *ptr) { cudaFree(ptr); });
 }
 
-std::shared_ptr<CudaFloatTensor> CudaFloatTensor::create(std::vector<int> shape, std::vector<int> stride) {
-    return std::make_shared<CudaFloatTensor>(shape, stride);
+CudaFloatTensorPtr CudaFloatTensor::create(std::vector<int> shape, std::vector<int> stride, bool requires_grad, bool is_leaf) {
+    return std::make_shared<CudaFloatTensor>(shape, stride, requires_grad, is_leaf);
 }
 
-std::shared_ptr<CudaFloatTensor> CudaFloatTensor::create(FloatTensor* t) {
+
+CudaFloatTensorPtr CudaFloatTensor::create(FloatTensorPtr t) {
     auto ct = CudaFloatTensor::create(t->get_shape(), t->get_stride());
     cudaMemcpy(ct->get_data().get(), t->get_data().get(), t->get_numel() * sizeof(float), cudaMemcpyHostToDevice);
     return ct;
