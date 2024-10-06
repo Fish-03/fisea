@@ -11,10 +11,12 @@
 
 using namespace fisea;
 
-FloatTensor::FloatTensor(std::vector<int> shape, std::vector<int> stride)
+FloatTensor::FloatTensor(std::vector<int> shape, std::vector<int> stride, bool requires_grad, bool is_leaf)
 {
     this->device = Device::CPU;
     this->dtype = Dtype::FLOAT;
+    this->requires_grad = requires_grad;
+    this->is_leaf = is_leaf;
 
     if (shape.empty())
     {
@@ -49,26 +51,28 @@ FloatTensor::FloatTensor(std::vector<int> shape, std::vector<int> stride)
     this->numel = numel;
 
     this->data = std::shared_ptr<float>(new float[this->numel], std::default_delete<float[]>());
+
+    std::cout << "[DEBUG] FloatTensor is created" << std::endl;
 }
 
-std::shared_ptr<FloatTensor> FloatTensor::create(std::vector<int> shape, std::vector<int> stride)
+FloatTensorPtr FloatTensor::create(std::vector<int> shape, std::vector<int> stride, bool requires_grad, bool is_leaf)
 {
-    return std::make_shared<FloatTensor>(shape, stride);
+    return std::make_shared<FloatTensor>(shape, stride, requires_grad, is_leaf);
 }
 
-std::shared_ptr<FloatTensor> FloatTensor::cpu()
+FloatTensorPtr FloatTensor::cpu()
 {
     return shared_from_this();
 }
 
 std::shared_ptr<CudaFloatTensor> FloatTensor::cuda()
 {
-    return CudaFloatTensor::create(this);
+    return CudaFloatTensor::create(shared_from_this());
 }
 
 void FloatTensor::print(const char *fmt, int depth, int start, int maxWidth, int maxHeight) const
 {
-    
+
     float *dataPtr = this->data.get();
     int dims = shape.size();
 
@@ -141,7 +145,7 @@ void FloatTensor::uniform_(float low, float high)
 {
     auto indices = this->get_indices();
     float *dataPtr = this->data.get();
-    
+
     for (int i : indices)
     {
         dataPtr[i] = fisea::rand(low, high);
@@ -152,23 +156,60 @@ void FloatTensor::normal_(float mean, float std)
 {
     auto indices = this->get_indices();
     float *dataPtr = this->data.get();
-    
+
     for (int i : indices)
     {
         dataPtr[i] = mean + std * fisea::randn();
     }
 }
-void FloatTensor::backward(std::shared_ptr<FloatTensor> grad)
+
+template <typename T>
+void FloatTensor::fill_(T value)
 {
+    auto indices = this->get_indices();
+    auto ptr = this->data.get();
+
+    value = static_cast<float>(value);
+
+    for (int i : indices)
+    {
+        ptr[i] = value;
+    }
+}
+
+template void FloatTensor::fill_<int>(int value);
+template void FloatTensor::fill_<float>(float value);
+template void FloatTensor::fill_<double>(double value);
+
+void FloatTensor::backward(std::shared_ptr<FloatTensor> grad, bool retain_graph, bool create_graph)
+{
+    if (grad == nullptr)
+    {
+        if (this->grad == nullptr)
+        {
+            grad = FloatTensor::create(this->shape, {}, requires_grad = false, is_leaf = false);
+            grad->ones_();
+        }
+        else
+        {
+            grad = this->grad;
+        }
+    }
+
     if (this->grad_fn != nullptr)
     {
-        this->grad_fn(shared_from_this(), grad);
+        this->grad_fn(grad, retain_graph, create_graph);
     }
-    else{
+
+    else
+    {
         // std::cout << "grad_fn is nullptr" << std::endl;
-        try {
+        try
+        {
             throw std::invalid_argument("grad_fn is nullptr");
-        } catch (const std::invalid_argument &e) {
+        }
+        catch (const std::invalid_argument &e)
+        {
             std::cerr << e.what() << '\n';
         }
     }

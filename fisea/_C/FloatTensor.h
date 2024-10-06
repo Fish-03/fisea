@@ -11,25 +11,30 @@ namespace fisea
 {
     class CudaFloatTensor;
 
-    class FloatTensor : public std::enable_shared_from_this<FloatTensor>, public Tensor {
+    class FloatTensor : public TensorBase, public std::enable_shared_from_this<FloatTensor> {
     protected:
         std::shared_ptr<float> data;
         std::shared_ptr<FloatTensor> grad;
-        fisea::_gradInfo<FloatTensor> gradinfo;
 
     public:
-        FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        bool requires_grad = true;
+        bool is_leaf = true;
+        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
+        FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~FloatTensor()
         {
             std::cout << "[DEBUG] FloatTensor is deleted" << std::endl;
         };
-        static std::shared_ptr<FloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
+        static FloatTensorPtr create(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
+        
+        std::function<void(FloatTensorPtr, bool, bool)> grad_fn = nullptr;
+        
+        void backward(std::shared_ptr<FloatTensor> grad = nullptr, bool retain_graph = false, bool create_graph = false);
 
         std::shared_ptr<FloatTensor> cpu();
         std::shared_ptr<CudaFloatTensor> cuda();
-        std::function<void(std::shared_ptr<FloatTensor>, std::shared_ptr<FloatTensor>)> grad_fn = nullptr;
-        std::vector<std::shared_ptr<FloatTensor>> grad_fn_records{};
-        void backward(std::shared_ptr<FloatTensor> grad = nullptr);
+
+        
 
         const std::shared_ptr<float> &get_data() const { return data; }
         void set_data(std::shared_ptr<float> data) { this->data = data; }
@@ -39,18 +44,7 @@ namespace fisea
         void print(const char *fmt = "%6.3f", int depth = 0, int start = 0, int maxWidth = 100, int maxHeight = 10) const;
 
         template <typename T>
-        void fill_(T value)
-        {
-            auto indices = this->get_indices();
-            auto ptr = this->data.get();
-
-            value = static_cast<float>(value);
-
-            for (int i : indices)
-            {
-                ptr[i] = value;
-            }
-        }
+        void fill_(T value);
 
         void ones_() { fill_(1.0); }
         void zeros_() { fill_(0.0); }
@@ -58,23 +52,26 @@ namespace fisea
         void normal_(float mean = 0.0, float std = 1.0);
     };
 
-    class CudaFloatTensor : public Tensor, public std::enable_shared_from_this<CudaFloatTensor>
+    class CudaFloatTensor : public TensorBase, public std::enable_shared_from_this<CudaFloatTensor>
     {
     protected:
         std::shared_ptr<float> data;
         std::shared_ptr<CudaFloatTensor> grad;
-        _gradInfo<CudaFloatTensor> gradinfo;
 
     public:
+        bool requires_grad = true;
+        bool is_leaf = true;
+        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
         
-
-        CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {});
+        std::function<void(FloatTensorPtr, bool, bool)> grad_fn = nullptr;
+        
+        CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~CudaFloatTensor()
         {
             std::cout << "[DEBUG] CudaFloatTensor is deleted" << std::endl;
         };
-        static std::shared_ptr<CudaFloatTensor> create(std::vector<int> shape = {}, std::vector<int> stride = {});
-        static std::shared_ptr<CudaFloatTensor> create(FloatTensor *tensor);
+        static CudaFloatTensorPtr create(FloatTensorPtr t);
+        static CudaFloatTensorPtr create(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
 
         std::shared_ptr<FloatTensor> cpu() const;
         std::shared_ptr<CudaFloatTensor> cuda();

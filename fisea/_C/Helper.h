@@ -1,6 +1,7 @@
 // 這裡定義一些有的沒的函數
 #pragma once
-
+#include "type.h"
+#include "TensorBase.h"
 const int kCudaThreadsNum = 512;
 
 inline int CudaGetBlocks(const int N)
@@ -15,7 +16,8 @@ inline int CudaGetBlocks(const int N)
 
 namespace fisea
 {
-    inline void __grapIdx(std::vector<int> &indices, int depth, int start, Tensor *t)
+    template <typename T>
+    inline void __grapIdx(std::vector<int> &indices, int depth, int start, T t)
     {
         if (depth == t->ndim() - 1)
         {

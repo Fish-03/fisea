@@ -3,16 +3,11 @@
 #include "FloatTensor.h"
 namespace fisea
 {
-class ReLU : public FunctionBase
-    {
-    private:
-        std::shared_ptr<FloatTensor> forward(std::shared_ptr<FloatTensor> input, std::shared_ptr<FloatTensor> output=nullptr) override;
-        void backward(std::shared_ptr<FloatTensor> input, std::shared_ptr<FloatTensor> grad=nullptr) override;
-
+class relu : public FnBase<relu>
+{
     public:
-        ReLU() {};
-        ~ReLU() {};
+        static FloatTensorPtr forward(ctx_t &ctx, FloatTensorPtr x);
+        static std::tuple<FloatTensorPtr> backward(ctx_t &ctx, FloatTensorPtr grad);
+};
 
-    };
-    
-} // namespace fisea
+}
