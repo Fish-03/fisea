@@ -51,6 +51,8 @@ FloatTensor::FloatTensor(std::vector<int> shape, std::vector<int> stride, bool r
     this->numel = numel;
 
     this->data = std::shared_ptr<float>(new float[this->numel], std::default_delete<float[]>());
+
+    std::cout << "[DEBUG] FloatTensor is created" << std::endl;
 }
 
 FloatTensorPtr FloatTensor::create(std::vector<int> shape, std::vector<int> stride, bool requires_grad, bool is_leaf)
@@ -179,7 +181,7 @@ template void FloatTensor::fill_<int>(int value);
 template void FloatTensor::fill_<float>(float value);
 template void FloatTensor::fill_<double>(double value);
 
-void FloatTensor::backward(std::shared_ptr<FloatTensor> grad)
+void FloatTensor::backward(std::shared_ptr<FloatTensor> grad, bool retain_graph, bool create_graph)
 {
     if (grad == nullptr)
     {
@@ -196,8 +198,9 @@ void FloatTensor::backward(std::shared_ptr<FloatTensor> grad)
 
     if (this->grad_fn != nullptr)
     {
-        this->grad_fn(grad);
+        this->grad_fn(grad, retain_graph, create_graph);
     }
+
     else
     {
         // std::cout << "grad_fn is nullptr" << std::endl;

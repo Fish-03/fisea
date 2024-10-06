@@ -30,8 +30,8 @@ namespace fisea
         std::shared_ptr<Tensor> grad;
 
     public:
-        bool requires_grad = false;
-        bool is_leaf = true;
+        // bool requires_grad = false;
+        // bool is_leaf = true;
         virtual ~TensorBase() {};
         // static TensorBase *create(const std::vector<int> &shap);
 
@@ -43,7 +43,6 @@ namespace fisea
         const fisea::Device &get_device() { return device; }
         const fisea::Dtype &get_dtype() { return dtype; }
         const std::vector<int> &get_stride() { return stride; }
-        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
 
         std::vector<int> get_indices();
     };

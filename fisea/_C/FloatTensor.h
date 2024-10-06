@@ -18,6 +18,8 @@ namespace fisea
 
     public:
         bool requires_grad = true;
+        bool is_leaf = true;
+        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
         FloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~FloatTensor()
         {
@@ -25,9 +27,9 @@ namespace fisea
         };
         static FloatTensorPtr create(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         
-        std::function<void(FloatTensorPtr)> grad_fn = nullptr;
+        std::function<void(FloatTensorPtr, bool, bool)> grad_fn = nullptr;
         
-        void backward(std::shared_ptr<FloatTensor> grad = nullptr);
+        void backward(std::shared_ptr<FloatTensor> grad = nullptr, bool retain_graph = false, bool create_graph = false);
 
         std::shared_ptr<FloatTensor> cpu();
         std::shared_ptr<CudaFloatTensor> cuda();
@@ -58,6 +60,11 @@ namespace fisea
 
     public:
         bool requires_grad = true;
+        bool is_leaf = true;
+        void requires_grad_(bool requires_grad) { this->requires_grad = requires_grad; }
+        
+        std::function<void(FloatTensorPtr, bool, bool)> grad_fn = nullptr;
+        
         CudaFloatTensor(std::vector<int> shape = {}, std::vector<int> stride = {}, bool requires_grad = true, bool is_leaf = true);
         ~CudaFloatTensor()
         {

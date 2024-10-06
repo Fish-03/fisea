@@ -41,11 +41,11 @@ namespace fisea
 
     template <typename argTuple, typename gradTuple, size_t Index = 0>
     std::enable_if_t<Index == std::tuple_size_v<argTuple>, void>
-    call_grad_fn_if_exists(const argTuple &t, const gradTuple &g) {}
+    call_grad_fn_if_exists(const argTuple &t, const gradTuple &g, bool retain_graph, bool create_graph) {}
 
     template <typename argTuple, typename gradTuple, size_t Index = 0>
         std::enable_if_t < Index<std::tuple_size_v<argTuple>, void>
-                           call_grad_fn_if_exists(const argTuple &t, const gradTuple &g)
+                           call_grad_fn_if_exists(const argTuple &t, const gradTuple &g, bool retain_graph, bool create_graph)
     {
         using T = std::tuple_element_t<Index, argTuple>;
         T obj = std::get<Index>(t);
@@ -54,15 +54,15 @@ namespace fisea
         // 如果对象存在 grad_fn 并且不是 leaf 节点，调用 grad_fn，否则调用 set_grad
         if (obj->grad_fn)
         {
-            obj->grad_fn(grad); // 否则调用 grad_fn
+            obj->grad_fn(grad, retain_graph, create_graph); // 否则调用 grad_fn
         }
 
-        if constexpr (is_leaf<T>::value)
+        if (obj->is_leaf)
         {
             obj->set_grad(grad); // 如果是 leaf，调用 set_grad
         }
 
-        call_grad_fn_if_exists<argTuple, gradTuple, Index + 1>(t, g);
+        call_grad_fn_if_exists<argTuple, gradTuple, Index + 1>(t, g,  retain_graph,  create_graph);
     }
 
     template <typename T>
@@ -79,10 +79,14 @@ namespace fisea
             // 然后再转发参数，可能会移动参数的所有权
             auto out = U::forward(ctx, std::forward<Args>(args)...);
 
-            out->grad_fn = [ctx, captured_vars](auto grad) mutable
+            out->grad_fn = [ctx, captured_vars, out](auto grad, bool retain_graph = false, bool create_graph = false) mutable
             {
                 auto gradTuple = U::backward(ctx, grad);
-                call_grad_fn_if_exists(captured_vars, gradTuple);
+                call_grad_fn_if_exists(captured_vars, gradTuple, retain_graph, create_graph);
+                if (!retain_graph)
+                {
+                    out->grad_fn = nullptr;
+                }
             };
             return out;
         }
